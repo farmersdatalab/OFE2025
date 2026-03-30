@@ -1,0 +1,191 @@
+/* ------- Farmers DataLab - UI minimal ------- */
+
+/* Palette */
+:root {
+  --base-bg: #ffffff;
+  --base-text: #222222;
+  --brand-green: #4CAF50;
+  --accent-yellow: #F9C74F;
+  --muted: #e9ecef;
+  --border: #e5e7eb;
+}
+
+/* Soft reset */
+body {
+  background: var(--base-bg);
+  color: var(--base-text);
+}
+
+/* -------- Top bar -------- */
+.lab-topbar {
+  background: var(--brand-green);
+  color: #fff;
+  padding: 14px 20px;
+  border-bottom: 4px solid #3f8f43;
+  margin-bottom: 8px;
+}
+
+.lab-topbar__inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.lab-topbar__left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lab-topbar__logos {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.lab-logo {
+  height: 38px;
+  width: auto;
+  mix-blend-mode: screen;
+  filter: brightness(1.1);
+}
+
+.lab-logo + .lab-logo {
+  padding-left: 10px;
+  border-left: 1px solid rgba(255,255,255,0.4);
+}
+
+.lab-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+}
+
+.lab-subtitle {
+  font-size: 0.88rem;
+  opacity: 0.92;
+  max-width: 680px;
+  line-height: 1.4;
+}
+
+.lab-topbar__right {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.lab-topbar__right .btn.btn-download {
+  background: #fff;
+  color: var(--brand-green);
+  border: none;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 6px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.lab-topbar__right .btn.btn-download:hover {
+  background: #f0f0f0;
+}
+
+/* -------- Sidebar TOC -------- */
+.sidebar nav#TOC {
+  background: var(--accent-yellow);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.sidebar nav#TOC .toc-title {
+  font-weight: 700;
+}
+
+.sidebar nav#TOC a {
+  color: #333;
+}
+
+.sidebar nav#TOC a:hover {
+  color: #111;
+  text-decoration: underline;
+}
+
+/* -------- Intro banner -------- */
+.page-intro {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-left: 6px solid var(--brand-green);
+  padding: 14px 18px;
+  margin: 16px 0 8px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+/* -------- Module grid -------- */
+.grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+@media (max-width: 992px) {
+  .grid-2col { grid-template-columns: 1fr; }
+}
+
+.card-module {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-top: 6px solid var(--accent-yellow);
+  border-radius: 10px;
+  padding: 14px 14px 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.card-module h2 {
+  margin-top: 4px;
+  font-size: 1.2rem;
+}
+
+.section-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.btn.btn-outline {
+  border: 1px solid var(--brand-green);
+  color: var(--brand-green);
+  background: transparent;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.btn.btn-outline:hover {
+  background: rgba(76, 175, 80, 0.08);
+}
+
+/* -------- Tabsets & accordions -------- */
+.panel-tabset .nav-link.active {
+  color: var(--brand-green) !important;
+  border-bottom-color: var(--brand-green) !important;
+}
+
+.accordion .accordion-button {
+  background: #fff;
+  color: var(--base-text);
+}
+
+.accordion .accordion-button:not(.collapsed) {
+  color: var(--brand-green);
+  background: rgba(76, 175, 80, 0.06);
+  box-shadow: none;
+}
+
+.accordion .accordion-item {
+  border-color: var(--border);
+}
