@@ -1,0 +1,488 @@
+---
+title: "YOUR OFE 2025 REPORT"
+author: "Farmers DataLab"
+date: today
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+    toc-title: "Contents"
+    toc-location: left
+    smooth-scroll: true
+    number-sections: false
+    df-print: paged
+    code-fold: false
+    link-external-newwindow: true
+  pdf:
+    documentclass: scrartcl
+    papersize: letter
+    fontsize: 11pt
+    geometry: margin=1in
+format-links: [pdf]
+params:
+  farmer_name: "CORCORAN"
+editor: source
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(plotly)
+library(htmltools)
+library(effectsize)
+
+# ============================================================
+#  📂 RUTA DE DATOS — MODIFICAR AQUÍ
+# ============================================================
+data_dir <- "data"
+
+# ============================================================
+#  ARCHIVOS CSV
+# ============================================================
+cn_file     <- "OFE2025_CN.csv"
+nrates_file <- "OFE2025_NRates.csv"
+
+# ============================================================
+#  N RATES — LECTURA Y FILTRO CORCORAN
+# ============================================================
+nrates_all <- read_csv(file.path(data_dir, nrates_file), show_col_types = FALSE)
+
+corc_nrates <- nrates_all |>
+  filter(FarmName == "corcoran") |>
+  rename(PlotID = PlotName, Nrate = Nrate_lbAc)
+
+# ============================================================
+#  C:N BIOMASA — LECTURA Y CÁLCULO CORCORAN
+# ============================================================
+cn_all <- read_csv(file.path(data_dir, cn_file), show_col_types = FALSE)
+
+corc_cn <- cn_all |>
+  filter(FarmName == "corcoran", SampleType == "MaizeBiomass") |>
+  mutate(
+    CN_ratio  = TotalC_pct / TotalN_pct,
+    Treatment = factor(Treatment, levels = c("T0", "T1", "T2", "T3"))
+  ) |>
+  left_join(corc_nrates |> select(PlotID, Nrate),
+            by = c("Treatment" = "PlotID")) |>
+  mutate(
+    Nrate_label = paste0(Nrate, " lb N/ac"),
+    Trt_label   = paste0(Treatment, " (", Nrate, " lb N/ac)")
+  )
+
+# ============================================================
+#  SUMMARY POR TRATAMIENTO
+# ============================================================
+cn_summary <- corc_cn |>
+  group_by(Treatment, Nrate) |>
+  summarise(
+    n        = n(),
+    mean_N   = round(mean(TotalN_pct, na.rm = TRUE), 3),
+    sd_N     = round(sd(TotalN_pct,   na.rm = TRUE), 3),
+    se_N     = round(sd_N / sqrt(n), 3),
+    mean_CN  = round(mean(CN_ratio,   na.rm = TRUE), 2),
+    sd_CN    = round(sd(CN_ratio,     na.rm = TRUE), 2),
+    se_CN    = round(sd_CN / sqrt(n), 2),
+    .groups  = "drop"
+  ) |>
+  arrange(Nrate)
+
+# Valores de referencia: T0 = Control (60 lb N/ac, farmer rate)
+ctrl_N  <- cn_summary |> filter(Treatment == "T0") |> pull(mean_N)
+ctrl_CN <- cn_summary |> filter(Treatment == "T0") |> pull(mean_CN)
+
+# ============================================================
+#  PALETAS Y HELPERS
+# ============================================================
+pal_trt <- c("T0" = "#e879a0",   # control — pink
+             "T1" = "#0d9488",   # 60 lb N/ac — teal
+             "T2" = "#3b82f6",   # 50 lb N/ac — blue
+             "T3" = "#f59e0b")   # 40 lb N/ac — amber
+
+fmt <- function(x) ifelse(x == round(x), as.character(round(x)), as.character(x))
+
+# ============================================================
+#  FUNCIÓN: tarjeta simple por tratamiento
+# ============================================================
+nrate_cards <- function(summary_df, metric_col, label_suffix, note = "") {
+  vals       <- round(summary_df[[metric_col]], 3)
+  treatments <- as.character(summary_df[["Treatment"]])
+  nrates     <- summary_df[["Nrate"]]
+
+  cards_html <- mapply(function(trt, nr, val) {
+    border_col <- pal_trt[trt]
+    paste0(
+      '<div class="sc" style="border-top: 4px solid ', border_col, '">',
+        '<div class="sc-label">', trt, ' — ', nr, ' lb N/ac</div>',
+        '<div class="sc-main">',
+          '<span class="sc-val">', val, '</span>',
+          '<span class="sc-delta" style="font-size:0.85rem;">', label_suffix, '</span>',
+        '</div>',
+      '</div>'
+    )
+  }, treatments, nrates, vals) |>
+    paste(collapse = "\n")
+
+  HTML(paste0(
+    '<style>
+      .sc-row { display: grid; grid-template-columns: repeat(4, 1fr);
+                gap: 12px; margin: 16px 0 24px; }
+      .sc { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px;
+            padding: 18px 20px; overflow: hidden; }
+      .sc-label { font-size: 10px; font-weight: 700; letter-spacing: 1.3px;
+                  text-transform: uppercase; color: #9ca3af; margin-bottom: 8px; }
+      .sc-main  { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+      .sc-val   { font-size: 2rem; font-weight: 700; font-family: monospace; line-height: 1; }
+      .sc-delta { font-size: 0.85rem; font-weight: 600; color: #6b7280; }
+      .sc-sub   { font-size: 11px; color: #9ca3af; margin-top: 6px; }
+      @media (max-width: 800px) { .sc-row { grid-template-columns: 1fr 1fr; } }
+      @media (max-width: 500px) { .sc-row { grid-template-columns: 1fr; } }
+    </style>
+    <div class="sc-row">',
+    cards_html,
+    '</div>',
+    if (nchar(note) > 0) paste0('<p style="font-size:0.82rem;color:#9ca3af;margin-top:-8px;">', note, '</p>') else ""
+  ))
+}
+```
+
+```{=html}
+<div class="lab-topbar">
+  <div class="lab-topbar__inner">
+    <div class="lab-topbar__left">
+      <div class="lab-topbar__logos">
+        <img class="lab-logo lab-logo--seal" src="images/cornell_seal_white.svg" alt="Cornell University" onerror="this.style.display='none'" />
+        <img class="lab-logo lab-logo--wordmark" src="images/farmersdatalab_logo_white.svg" alt="Farmers DataLab" onerror="this.style.display='none'" />
+      </div>
+      <span class="lab-title">2025 Cropping Season</span>
+      <span class="lab-subtitle">
+       <strong>Research question:</strong> Can we reduce nitrogen rates after a cover crop planted behind soybeans or dry beans?
+      </span>
+    </div>
+    <div class="lab-topbar__right">
+      <a class="btn btn-download" href="index.pdf" title="Download PDF version">
+        ⬇ Download PDF
+      </a>
+    </div>
+  </div>
+</div>
+```
+
+::: {.page-intro}
+**Welcome to your 2025 farm report.**
+This report summarizes the on-farm nitrogen rate experiment conducted in your field. Four nitrogen application rates (T0 = 60, T1 = 60, T2 = 50, T3 = 40 lb N/ac) were compared following a cover crop planted behind soybeans or dry beans. The goal was to determine whether a cover crop allows a reduction in nitrogen inputs without sacrificing crop nitrogen status.
+:::
+
+```{=html}
+<figure style="margin: 20px 0; text-align: center;">
+  <img
+    src="images/corcoran_field.png"
+    alt="Corcoran field — treatment map"
+    style="max-width: 100%; border-radius: 8px; border: 1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,0.07);"
+    onerror="this.style.display='none'; document.getElementById('field-placeholder').style.display='block'"
+  />
+  <div id="field-placeholder" style="display:none; background:#f3f4f6; border-radius:8px;
+       padding:40px; color:#9ca3af; font-size:0.9rem; border:1px dashed #d1d5db;">
+    📍 Field map — place <code>corcoran_field.png</code> in the <code>images/</code> folder
+  </div>
+  <figcaption style="font-size: 0.82rem; color: #6b7280; margin-top: 8px;">
+    <strong>Figure 1.</strong> N-rate trial — treatment layout.
+  </figcaption>
+</figure>
+```
+
+::: {.page-intro}
+**Take-home message:** Corn biomass was analyzed for nitrogen concentration (%N) and C:N ratio across four N-rate strips. If the cover crop provides meaningful N credit, we would expect T2 (50 lb N/ac) and T3 (40 lb N/ac) to achieve nitrogen status comparable to the control (T0, 60 lb N/ac). Results are presented below.
+:::
+
+---
+
+## Results Summary {#summary}
+
+```{r summary-table, echo=FALSE, message=FALSE, warning=FALSE}
+summary_display <- cn_summary |>
+  mutate(
+    `Treatment` = paste0(Treatment, " (", Nrate, " lb N/ac)"),
+    `Mean %N`   = paste0(mean_N, " ± ", se_N),
+    `Mean C:N`  = paste0(mean_CN, " ± ", se_CN),
+    `n`         = n
+  ) |>
+  select(Treatment, n, `Mean %N`, `Mean C:N`)
+
+knitr::kable(summary_display,
+             align = c("l","c","c","c"),
+             caption = "Summary of corn biomass nitrogen (Mean ± SE) by N-rate treatment.")
+```
+
+::: {style="font-size: 0.82rem; color: #9ca3af; margin-top: -8px;"}
+n = 4 samples per treatment. T0 = Control (farmer rate, 60 lb N/ac). Results are descriptive; effect sizes are reported given small sample sizes.
+:::
+
+---
+
+## 🧪 C:N in Corn Biomass {#cn-details}
+
+::: {.page-intro}
+Corn biomass was collected and sent for laboratory C:N analysis. This measures the actual nitrogen concentration in plant tissue, a direct indicator of how much N the plant was able to take up at the time of sampling. **Note:** sample sizes are small (n = 4 per treatment), so results are descriptive. Effect sizes (Cohen's d vs Control) are reported instead of p-values.
+:::
+
+### Total Nitrogen in Biomass (%N) {#n-section}
+
+```{r cn-n-cards, echo=FALSE}
+nrate_cards(
+  cn_summary,
+  metric_col   = "mean_N",
+  label_suffix = "% N",
+  note         = "n = 4 per treatment — results are descriptive only."
+)
+```
+
+::: {.panel-tabset}
+
+## Bar Chart (%N)
+
+```{r cn-n-bar, echo=FALSE, message=FALSE, warning=FALSE}
+p_n <- ggplot(cn_summary, aes(x = fct_reorder(paste0(Treatment, "\n(", Nrate, " lb N/ac)"), Nrate),
+                               y = mean_N, fill = Treatment)) +
+  geom_col(width = 0.55, color = "black", alpha = 0.9) +
+  geom_errorbar(aes(ymin = mean_N - se_N, ymax = mean_N + se_N),
+                width = 0.15, linewidth = 1) +
+  geom_hline(yintercept = ctrl_N, linetype = "dashed", color = "#e879a0", linewidth = 0.8) +
+  annotate("text", x = 0.6, y = ctrl_N + 0.02,
+           label = paste0("Control (%N = ", ctrl_N, ")"),
+           hjust = 0, size = 3.2, color = "#e879a0") +
+  
+scale_fill_manual(values = pal_trt) +
+  coord_cartesian(ylim = c(0, 3.8)) + 
+  labs(
+    title    = "Nitrogen in Corn Biomass (Mean %N ± SE)",
+    subtitle = "Dashed line = Control (T0, 60 lb N/ac). Sampled 07/03/2025.",
+    x        = "Treatment (N Rate)",
+    y        = "Nitrogen (%)",
+    caption  = "Note: small sample size (n = 4) — results are descriptive only."
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "none", plot.title = element_text(face = "bold"),
+        panel.grid.minor = element_blank())
+
+ggplotly(p_n) |> layout(showlegend = FALSE)
+```
+
+## Raw Data (%N)
+
+```{r cn-n-raw, echo=FALSE, message=FALSE, warning=FALSE}
+p_raw_N <- ggplot(corc_cn,
+                  aes(x = fct_reorder(paste0(Treatment, "\n(", Nrate, " lb N/ac)"), Nrate),
+                      y = TotalN_pct, color = Treatment, fill = Treatment)) +
+  geom_jitter(width = 0.12, size = 3.5, alpha = 0.7) +
+  stat_summary(fun = mean, geom = "crossbar", width = 0.35,
+               linewidth = 0.8, fatten = 2) +
+  geom_hline(yintercept = ctrl_N, linetype = "dashed", color = "#e879a0", linewidth = 0.7) +
+  scale_color_manual(values = pal_trt) +
+  scale_fill_manual(values  = pal_trt) +
+  labs(
+    title    = "Individual Sample Values — Biomass %N",
+    subtitle = "Horizontal bar = group mean. Dashed = Control mean.",
+    x        = "Treatment (N Rate)",
+    y        = "Total Nitrogen (%)"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "none", plot.title = element_text(face = "bold"),
+        panel.grid.minor = element_blank())
+
+ggplotly(p_raw_N) |> layout(showlegend = FALSE)
+```
+
+:::
+
+---
+
+### C:N Ratio {#cn-ratio-section}
+
+::: {.page-intro}
+A lower C:N ratio indicates more nitrogen-rich plant tissue. If reduced N rates still produce tissue with a C:N comparable to the Control, that supports the idea that the cover crop is compensating for the lower applied N.
+:::
+
+```{r cn-ratio-cards, echo=FALSE}
+nrate_cards(
+  cn_summary |> select(Treatment, Nrate, mean_CN),
+  metric_col   = "mean_CN",
+  label_suffix = "C:N ratio",
+  note         = "Lower C:N = more nitrogen-rich tissue. n = 4 per treatment."
+)
+```
+
+::: {.panel-tabset}
+
+## Bar Chart (C:N)
+
+```{r cn-ratio-bar, echo=FALSE, message=FALSE, warning=FALSE}
+p_cn <- ggplot(cn_summary, aes(x = fct_reorder(paste0(Treatment, "\n(", Nrate, " lb N/ac)"), Nrate),
+                                y = mean_CN, fill = Treatment)) +
+  geom_col(width = 0.55, color = "black", alpha = 0.9) +
+  geom_errorbar(aes(ymin = mean_CN - se_CN, ymax = mean_CN + se_CN),
+                width = 0.15, linewidth = 1) +
+  geom_hline(yintercept = ctrl_CN, linetype = "dashed", color = "#e879a0", linewidth = 0.8) +
+  annotate("text", x = 0.6, y = ctrl_CN + 0.1,
+           label = paste0("Control (C:N = ", ctrl_CN, ")"),
+           hjust = 0, size = 3.2, color = "#e879a0") +
+  scale_fill_manual(values = pal_trt) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
+  labs(
+    title    = "C:N Ratio in Corn Biomass (Mean ± SE)",
+    subtitle = "Dashed line = Control (T0, 60 lb N/ac). Lower C:N = more N-rich tissue.",
+    x        = "Treatment (N Rate)",
+    y        = "C:N Ratio",
+    caption  = "Note: small sample size (n = 4) — results are descriptive only."
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "none", plot.title = element_text(face = "bold"),
+        panel.grid.minor = element_blank())
+
+ggplotly(p_cn) |> layout(showlegend = FALSE)
+```
+
+## Raw Data (C:N)
+
+```{r cn-ratio-raw, echo=FALSE, message=FALSE, warning=FALSE}
+p_raw_CN <- ggplot(corc_cn,
+                   aes(x = fct_reorder(paste0(Treatment, "\n(", Nrate, " lb N/ac)"), Nrate),
+                       y = CN_ratio, color = Treatment, fill = Treatment)) +
+  geom_jitter(width = 0.12, size = 3.5, alpha = 0.7) +
+  stat_summary(fun = mean, geom = "crossbar", width = 0.35,
+               linewidth = 0.8, fatten = 2) +
+  geom_hline(yintercept = ctrl_CN, linetype = "dashed", color = "#e879a0", linewidth = 0.7) +
+  scale_color_manual(values = pal_trt) +
+  scale_fill_manual(values  = pal_trt) +
+  labs(
+    title    = "Individual Sample Values — C:N Ratio",
+    subtitle = "Horizontal bar = group mean. Dashed = Control mean.",
+    x        = "Treatment (N Rate)",
+    y        = "C:N Ratio"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "none", plot.title = element_text(face = "bold"),
+        panel.grid.minor = element_blank())
+
+ggplotly(p_raw_CN) |> layout(showlegend = FALSE)
+```
+
+:::
+
+---
+
+## 🌱 Soil Health Assessment {#soilhealth}
+
+::: {.page-intro}
+Soil health was assessed using the **Cornell Soil Health Test**. The overall quality score was **63/100 (High)**. Physical indicators were strong (Available Water Capacity: 76, Surface Hardness: 69, Subsurface Hardness: 70). The main areas for improvement were biological indicators: **Organic Matter** (score 21-Low), **Soil Respiration** (score 28-Low), **Predicted Soil Protein** (score 32-Low), and **Aggregate Stability** (score 29-Low). Chemical indicators were excellent, with Soil pH (100), Extractable Phosphorus (100), and Extractable Potassium (92) all in the Very High range. Zinc was flagged as deficient.
+:::
+
+```{=html}
+<figure style="margin: 20px 0; text-align: center;">
+  <img
+    src="images/corcoran_soilhealth.jpg"
+    alt="Cornell Soil Health Assessment — Corcoran Field"
+    style="max-width: 100%; max-height: 600px; border-radius: 8px; border: 1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,0.07);"
+    onerror="this.style.display='none'"
+  />
+</figure>
+
+<div style="margin: 16px 0 24px;">
+  <a href="data/corcoran_soilhealth.pdf"
+     target="_blank"
+     rel="noopener noreferrer"
+     style="display: inline-flex; align-items: center; gap: 8px;
+            background: #4CAF50; color: #fff; font-weight: 600;
+            padding: 10px 18px; border-radius: 8px; text-decoration: none;
+            font-size: 0.95rem; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
+    ↗ Open Full Soil Health Report (PDF)
+  </a>
+</div>
+```
+
+---
+
+## 📝 Conclusion {#conclusion}
+
+```{r conclusion-callouts, echo=FALSE}
+# Compute deltas vs control for conclusion cards
+t2_N  <- cn_summary |> filter(Treatment == "T2") |> pull(mean_N)
+t3_N  <- cn_summary |> filter(Treatment == "T3") |> pull(mean_N)
+t2_CN <- cn_summary |> filter(Treatment == "T2") |> pull(mean_CN)
+t3_CN <- cn_summary |> filter(Treatment == "T3") |> pull(mean_CN)
+
+delta_t2_N  <- round(t2_N  - ctrl_N,  3)
+delta_t3_N  <- round(t3_N  - ctrl_N,  3)
+delta_t2_CN <- round(t2_CN - ctrl_CN, 2)
+delta_t3_CN <- round(t3_CN - ctrl_CN, 2)
+
+sign_t2_N  <- ifelse(delta_t2_N  >= 0, "+", "")
+sign_t3_N  <- ifelse(delta_t3_N  >= 0, "+", "")
+sign_t2_CN <- ifelse(delta_t2_CN >= 0, "+", "")
+sign_t3_CN <- ifelse(delta_t3_CN >= 0, "+", "")
+
+HTML(paste0('
+<style>
+  .conclusion-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 20px 0;
+  }
+  .conc-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-left: 6px solid #4CAF50;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 0.93rem;
+  }
+  .conc-card.amber { border-left-color: #F9C74F; }
+  .conc-card.teal  { border-left-color: #0d9488; }
+  .conc-card.pink  { border-left-color: #e879a0; }
+  .conc-title { font-weight: 700; font-size: 0.85rem; text-transform: uppercase;
+                letter-spacing: 0.8px; color: #6b7280; margin-bottom: 6px; }
+  @media (max-width: 700px) { .conclusion-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="conclusion-grid">
+
+  <div class="conc-card teal">
+    <div class="conc-title">🧪 Biomass %N — T2 vs Control (50 vs 60 lb N/ac)</div>
+    T2 (50 lb N/ac) showed a mean biomass %N of <strong>', t2_N, '%</strong>
+    compared to Control at <strong>', ctrl_N, '%</strong>
+    (difference: ', sign_t2_N, delta_t2_N, '%). The C:N ratio for T2 was ',
+    t2_CN, ' vs Control at ', ctrl_CN,
+    ' (', sign_t2_CN, delta_t2_CN, '). With only 4 samples per treatment,
+    this is a descriptive finding — a promising signal to monitor in future seasons.
+  </div>
+
+  <div class="conc-card amber">
+    <div class="conc-title">🧪 Biomass %N — T3 vs Control (40 vs 60 lb N/ac)</div>
+    T3 (40 lb N/ac) showed a mean biomass %N of <strong>', t3_N, '%</strong>
+    compared to Control at <strong>', ctrl_N, '%</strong>
+    (difference: ', sign_t3_N, delta_t3_N, '%). The C:N ratio for T3 was ',
+    t3_CN, ' vs Control at ', ctrl_CN,
+    ' (', sign_t3_CN, delta_t3_CN, '). Results should be interpreted with caution
+    given the small sample size (n = 4).
+  </div>
+
+  <div class="conc-card">
+    <div class="conc-title">🌱 Soil Health Context</div>
+    The Cornell Soil Health Assessment (Overall Score: <strong>63/High</strong>) identified
+    low biological activity as the main constraint — Organic Matter (21), Soil Respiration (28),
+    and Aggregate Stability (29) are all in the Low range. These indicators suggest that
+    the cover crop system has room to build soil biology over time, which may increase
+    N mineralization and support N credit in future seasons.
+  </div>
+
+  <div class="conc-card pink">
+    <div class="conc-title">📌 Next Steps</div>
+    Continue the N-rate trial in future seasons with larger sample sizes to enable
+    formal statistical testing. Monitoring end-of-season biomass and yield alongside
+    in-season nitrogen status (Dualex) would strengthen the evidence base. The consistent
+    design across strips makes this field well-positioned for multi-year analysis.
+  </div>
+
+</div>
+'))
+```

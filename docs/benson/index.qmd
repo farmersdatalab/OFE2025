@@ -213,6 +213,36 @@ bens_nrate <- nrates |> filter(FarmName == "benson") |> pull(Nrate_lbAc)
 bens_nrate_val <- bens_nrate[1]  # 74.5
 
 # ============================================================
+#  YIELD — BENSON
+# ============================================================
+yield_file <- "benson_yield.csv"
+
+bens_yield <- read_csv(file.path(data_dir, yield_file), show_col_types = FALSE) |>
+  rename(yield_mgha = Yield) |>
+  mutate(
+    yield_buac = yield_mgha * 14.87,
+    Treatment  = factor(Treatment, levels = c("No Cover", "Cover"))
+  )
+
+yield_summary <- bens_yield |>
+  group_by(Treatment) |>
+  summarise(
+    n          = n(),
+    mean_mgha  = round(mean(yield_mgha,  na.rm = TRUE), 3),
+    median_mgha= round(median(yield_mgha,na.rm = TRUE), 3),
+    sd_mgha    = round(sd(yield_mgha,    na.rm = TRUE), 3),
+    mean_buac  = round(mean(yield_buac,  na.rm = TRUE), 1),
+    median_buac= round(median(yield_buac,na.rm = TRUE), 1),
+    sd_buac    = round(sd(yield_buac,    na.rm = TRUE), 1),
+    .groups    = "drop"
+  )
+
+mean_cover_yield   <- yield_summary |> filter(Treatment == "Cover")    |> pull(mean_buac)
+mean_nocover_yield <- yield_summary |> filter(Treatment == "No Cover") |> pull(mean_buac)
+delta_yield        <- round(mean_cover_yield - mean_nocover_yield, 1)
+pct_yield          <- round(100 * delta_yield / mean_nocover_yield, 1)
+
+# ============================================================
 #  PALETAS Y HELPERS
 # ============================================================
 pal    <- c("control" = "#e879a0", "treatment" = "#0d9488")
@@ -325,7 +355,7 @@ cn_cards <- function(mean_cover, mean_nocover, pct_inc, cohen_d, label_metric, n
 
 ::: {.page-intro}
 **Welcome to your 2025 farm report.**
-This report summarizes the on-farm nitrogen experiment conducted in your Kolb2 field, where clover cover crop strips (treatment) were compared against no-cover-crop controls. The central question this season: *can a clover cover crop supply 60 lbs of nitrogen per acre to the following corn crop?*
+This report summarizes the on-farm nitrogen experiment conducted in your Kolb2 field, where clover cover crop strips (treatment) were compared against no-cover-crop controls. 
 :::
 
 ```{=html}
@@ -338,15 +368,13 @@ This report summarizes the on-farm nitrogen experiment conducted in your Kolb2 f
   />
   <figcaption style="font-size: 0.82rem; color: #6b7280; margin-top: 8px;">
     <strong>Figure 1.</strong> Benson Kolb2 — treatment layout.
-    <span style="background:#0d9488; color:#fff; border-radius:4px; padding:1px 7px; font-size:0.78rem; margin-left:4px;">■ Treatment</span>
-    <span style="background:#e879a0; color:#fff; border-radius:4px; padding:1px 7px; font-size:0.78rem; margin-left:4px;">■ Control</span>
-    &nbsp;·&nbsp; Cover crop species: <em>Clover</em>
+        &nbsp;·&nbsp; Cover crop species: <em>Clover</em>
   </figcaption>
 </figure>
 ```
 
 ::: {.page-intro}
-**Take-home message:** This season's data provides multiple windows into nitrogen dynamics across the clover-treated and control strips. The in-season Dualex readings, corn biomass nitrogen, grain nitrogen content, and end-of-season cornstalk nitrate test together help evaluate whether the clover cover crop was able to meet the 60 lb N/ac target. Both CSNT values came in below the 250 ppm sufficiency threshold, suggesting nitrogen was limiting across the field regardless of treatment, an important finding in itself.
+**Take-home message:** Across all in-season nitrogen indicators (NBI, chlorophyll, biomass %N, and grain %N) corn plants in the clover cover crop strips consistently showed higher nitrogen status than control plots, and this translated into a meaningful yield advantage of +16 bu/ac (+11.8%) at harvest. That said, end-of-season cornstalk nitrate values fell below the 250 ppm sufficiency threshold in both strips, suggesting that while the cover crop improved early-season nitrogen availability, the full 60 lb N/ac target was likely not met, making direct clover biomass sampling in 2026 the key next step.
 :::
 
 ---
@@ -356,6 +384,7 @@ This report summarizes the on-farm nitrogen experiment conducted in your Kolb2 f
 ```{r summary-table, echo=FALSE, message=FALSE, warning=FALSE}
 summary_df <- tibble(
   Metric = c(
+    "🌽 Corn Yield",
     "🌿 NBI (Nitrogen Balance Index)",
     "🍃 Chlorophyll Index",
     "🧪 Biomass %N — (MaizeBiomass)",
@@ -367,23 +396,26 @@ summary_df <- tibble(
     paste0(m_ctrl_chl),
     paste0(mean_nocover_N_bio, "%"),
     paste0(mean_nocover_N_gr, "%"),
-    paste0(csnt_ctrl, " ppm")
+    paste0(csnt_ctrl, " ppm"),
+    paste0(mean_nocover_yield, " bu/ac")
   ),
   `Cover (Treatment)` = c(
     paste0(m_cover_nbi),
     paste0(m_cover_chl),
     paste0(mean_cover_N_bio, "%"),
     paste0(mean_cover_N_gr, "%"),
-    paste0(csnt_cover, " ppm")
+    paste0(csnt_cover, " ppm"),
+    paste0(mean_cover_yield, " bu/ac")
   ),
   `Difference` = c(
     paste0(sign_fmt(delta_nbi), " (", pct_nbi, "%)"),
     paste0(sign_fmt(delta_chl), " (", pct_chl, "%)"),
     paste0(sign_fmt(perc_N_bio), "%"),
     paste0(sign_fmt(perc_N_gr), "%"),
-    paste0(sign_fmt(csnt_cover - csnt_ctrl), " ppm")
+    paste0(sign_fmt(csnt_cover - csnt_ctrl), " ppm"),
+    paste0("+", delta_yield, " bu/ac (+", pct_yield, "%)")
   ),
-  `p-value` = c(p_nbi, p_chl, "n too small*", p_N_gr, "n = 1")
+  `p-value` = c(p_nbi, p_chl, "n too small*", p_N_gr, "n = 1", "spatial data†")
 )
 
 knitr::kable(summary_df, align = c("l","c","c","c","c"))
@@ -391,11 +423,13 @@ knitr::kable(summary_df, align = c("l","c","c","c","c"))
 
 ::: {style="font-size: 0.82rem; color: #9ca3af; margin-top: -8px;"}
 \* Biomass C:N sample sizes are small (n = `r n_nocover_bio` Control, n = `r n_cover_bio` Treatment). Effect sizes (Cohen's d) are reported instead of p-values for that section.
+† Yield monitor data contains ~130,000 GPS points with spatial autocorrelation — a simple p-value is not appropriate. The difference is reported as a descriptive field-level observation.
 :::
 
 ---
 
 ## 🌾 Corn Yield {#yield}
+
 
 ::: {.page-intro}
 The map below shows the **corn yield spatial distribution** across the Kolb2 field, displayed in quantiles. The line separates the clover cover crop (treatment) and control sub-fields.
@@ -411,10 +445,99 @@ The map below shows the **corn yield spatial distribution** across the Kolb2 fie
     onerror="this.style.display='none'"
   />
   <figcaption style="font-size: 0.82rem; color: #6b7280; margin-top: 8px;">
-    <strong>Figure 2.</strong> Corn yield map.
+    <strong>Figure 2.</strong> Corn yield map — spatial distribution by quantile.
   </figcaption>
 </figure>
 ```
+
+```{r yield-cards, echo=FALSE}
+HTML(paste0('
+<div class="sc-row">
+  <div class="sc" style="border-top: 4px solid #0d9488">
+    <div class="sc-label">Treatment — Mean Yield</div>
+    <div class="sc-main">
+      <span class="sc-val">', mean_cover_yield, '</span>
+      <span class="sc-delta">&#8593; +', delta_yield, ' bu/ac vs Control (', pct_yield, '%)</span>
+    </div>
+    <div class="sc-sub">Control mean: ', mean_nocover_yield, ' bu/ac &nbsp;|&nbsp; n = ',
+      format(yield_summary |> filter(Treatment=="Cover") |> pull(n), big.mark=","), ' yield monitor points</div>
+  </div>
+  <div class="sc" style="border-top: 4px solid #e879a0">
+    <div class="sc-label">Difference</div>
+    <div class="sc-main">
+      <span class="sc-val">+', pct_yield, '%</span>
+    </div>
+    <div class="sc-sub">Yield monitor data — spatial autocorrelation expected.<br>
+    Difference is descriptive, not a formal statistical test.</div>
+  </div>
+</div>
+'))
+```
+
+::: {.panel-tabset}
+
+## Density
+
+```{r yield-density, echo=FALSE, message=FALSE, warning=FALSE}
+set.seed(42)
+yield_plot <- bens_yield |>
+  slice_sample(n = 20000) |>
+  mutate(Treatment = fct_recode(Treatment, "Treatment" = "Cover", "Control" = "No Cover"))
+
+p_yd <- ggplot(yield_plot, aes(x = yield_buac, fill = Treatment, color = Treatment)) +
+  geom_density(alpha = 0.35, linewidth = 0.8) +
+  geom_vline(xintercept = mean_cover_yield,   color = "#0d9488", linewidth = 0.8,
+             linetype = "dashed") +
+  geom_vline(xintercept = mean_nocover_yield, color = "#e879a0", linewidth = 0.8,
+             linetype = "dashed") +
+  scale_fill_manual(values  = c("Treatment" = "#0d9488", "Control" = "#e879a0")) +
+  scale_color_manual(values = c("Treatment" = "#0d9488", "Control" = "#e879a0")) +
+  labs(
+    title    = "Corn Yield Distribution",
+    subtitle = paste0("Treatment mean = ", mean_cover_yield,
+                      " bu/ac  |  Control mean = ", mean_nocover_yield,
+                      " bu/ac  |  Delta = +", delta_yield, " bu/ac (+", pct_yield, "%)"),
+    x        = "Yield (bu/ac)",
+    y        = "Density",
+    fill     = NULL, color = NULL,
+    caption  = "Dashed lines = group means. Plotted on random sample of 20,000 yield monitor points."
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(plot.title      = element_text(face = "bold"),
+        legend.position = "bottom",
+        panel.grid.minor = element_blank())
+
+ggplotly(p_yd) |> layout(legend = list(orientation = "h", y = -0.2))
+```
+## Boxplot
+
+```{r yield-boxplot, echo=FALSE, message=FALSE, warning=FALSE}
+p_yb <- ggplot(yield_plot, aes(x = Treatment, y = yield_buac,
+                                fill = Treatment, color = Treatment)) +
+  geom_boxplot(alpha = 0.35, outlier.shape = NA, linewidth = 0.8, width = 0.4) +
+  geom_hline(yintercept = mean_cover_yield,   color = "#0d9488",
+             linetype = "dashed", linewidth = 0.6) +
+  geom_hline(yintercept = mean_nocover_yield, color = "#e879a0",
+             linetype = "dashed", linewidth = 0.6) +
+  scale_fill_manual(values  = c("Treatment" = "#0d9488", "Control" = "#e879a0")) +
+  scale_color_manual(values = c("Treatment" = "#0d9488", "Control" = "#e879a0")) +
+  scale_x_discrete(labels  = c("Cover" = "Treatment", "No Cover" = "Control")) +
+  labs(
+    title    = "Corn Yield by Treatment",
+    subtitle = paste0("Delta = +", delta_yield, " bu/ac (+", pct_yield, "%) — Treatment vs Control"),
+    x        = "Treatment",
+    y        = "Yield (bu/ac)",
+    caption  = "Outliers hidden for clarity. Sample of 20,000 yield monitor points."
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(plot.title      = element_text(face = "bold"),
+        legend.position = "none",
+        panel.grid.minor = element_blank())
+
+ggplotly(p_yb) |> layout(showlegend = FALSE)
+```
+
+:::
 
 ---
 
@@ -977,6 +1100,18 @@ HTML(paste0('
     the cover crop treatment. The 60 lb/ac clover N target was not
     demonstrably met this season — direct clover biomass sampling
     is needed to quantify actual N supply in 2026.
+  </div>
+
+  <div class="conc-card teal">
+    <div class="conc-title">🌽 Corn Yield — Cover vs No Cover</div>
+    Yield monitor data showed cover crop strips averaged
+    <strong>', mean_cover_yield, ' bu/ac</strong> vs
+    <strong>', mean_nocover_yield, ' bu/ac</strong> in control strips
+    — a difference of <strong>+', delta_yield, ' bu/ac (+', pct_yield, '%)</strong>.
+    Given the spatial autocorrelation inherent in yield monitor data,
+    this is a descriptive field observation rather than a formal
+    statistical result, but the direction is consistent with the
+    in-season nitrogen indicators.
   </div>
 
 </div>
