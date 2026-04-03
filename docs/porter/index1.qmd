@@ -44,7 +44,6 @@ data_dir <- "data"
 dualex_file <- "porter_dualex_survey.csv"
 cn_file     <- "OFE2025_CN.csv"
 csnt_file   <- "OFE2025_CSNT.csv"
-yield_file  <- "porter_yield.csv"
 
 # ============================================================
 #  DUALEX — LECTURA Y LIMPIEZA
@@ -160,41 +159,6 @@ csnt_ctrl      <- vill_csnt |> filter(Treatment == "Control")   |> pull(CSNT_ppm
 csnt_cover     <- vill_csnt |> filter(Treatment == "Treatment") |> pull(CSNT_ppm)
 csnt_ctrl_lab  <- paste0(csnt_ctrl,  " ppm")
 csnt_cover_lab <- paste0(csnt_cover, " ppm")
-
-# ============================================================
-#  YIELD — LECTURA Y ANÁLISIS
-# ============================================================
-df_yield <- read_csv(file.path(data_dir, yield_file), show_col_types = FALSE) |>
-  rename(yield = Yield, treatment = Treatment) |>
-  mutate(treatment = case_when(
-    treatment == "Mow"       ~ "control",
-    treatment == "No-mowing" ~ "treatment",
-    TRUE ~ treatment
-  ),
-  treatment = factor(treatment, levels = c("control", "treatment")))
-
-yield_stats <- df_yield |>
-  group_by(treatment) |>
-  summarise(
-    n    = n(),
-    mean = round(mean(yield, na.rm = TRUE), 3),
-    sd   = round(sd(yield,   na.rm = TRUE), 3),
-    se   = round(sd(yield,   na.rm = TRUE) / sqrt(n()), 4),
-    med  = round(median(yield, na.rm = TRUE), 3),
-    .groups = "drop"
-  )
-
-tt_yield <- t.test(yield ~ treatment, data = df_yield)
-
-m_ctrl_yield  <- yield_stats |> filter(treatment == "control")   |> pull(mean)
-m_cover_yield <- yield_stats |> filter(treatment == "treatment") |> pull(mean)
-n_ctrl_yield  <- yield_stats |> filter(treatment == "control")   |> pull(n)
-n_cover_yield <- yield_stats |> filter(treatment == "treatment") |> pull(n)
-
-delta_yield <- round(m_cover_yield - m_ctrl_yield, 3)
-pct_yield   <- round(100 * delta_yield / m_ctrl_yield, 2)
-p_yield     <- ifelse(tt_yield$p.value < 0.001, "p < 0.001",
-                      paste0("p = ", signif(tt_yield$p.value, 3)))
 
 # ============================================================
 #  PALETAS Y HELPERS
@@ -343,31 +307,27 @@ summary_df <- tibble(
     "🌿 NBI (Nitrogen Balance Index)",
     "🍃 Chlorophyll Index",
     "🧪 Biomass %N (C:N analysis)",
-    "🌽 CSNT (Cornstalk Nitrate)",
-    "🌾 Corn Yield (t/ha)"
+    "🌽 CSNT (Cornstalk Nitrate)"
   ),
   `Control` = c(
     paste0(m_ctrl_nbi),
     paste0(m_ctrl_chl),
     paste0(mean_nocover_N, "%"),
-    paste0(csnt_ctrl, " ppm"),
-    paste0(m_ctrl_yield)
+    paste0(csnt_ctrl, " ppm")
   ),
   `Treatment` = c(
     paste0(m_cover_nbi),
     paste0(m_cover_chl),
     paste0(mean_cover_N, "%"),
-    paste0(csnt_cover, " ppm"),
-    paste0(m_cover_yield)
+    paste0(csnt_cover, " ppm")
   ),
   `Difference` = c(
     paste0(ifelse(delta_nbi >= 0, "+", ""), delta_nbi, " (", pct_nbi, "%)"),
     paste0(ifelse(delta_chl >= 0, "+", ""), delta_chl, " (", pct_chl, "%)"),
     paste0(ifelse(perc_N >= 0, "+", ""), perc_N, "%"),
-    paste0(ifelse(csnt_cover - csnt_ctrl >= 0, "+", ""), csnt_cover - csnt_ctrl, " ppm"),
-    paste0(ifelse(delta_yield >= 0, "+", ""), delta_yield, " (", pct_yield, "%)")
+    paste0(ifelse(csnt_cover - csnt_ctrl >= 0, "+", ""), csnt_cover - csnt_ctrl, " ppm")
   ),
-  `p-value` = c(p_nbi, p_chl, "n too small*", "n = 1", p_yield)
+  `p-value` = c(p_nbi, p_chl, "n too small*", "n = 1")
 )
 
 knitr::kable(summary_df, align = c("l","c","c","c","c"))
@@ -398,83 +358,12 @@ The map below shows the **corn yield spatial distribution** across Field G7, dis
     <strong>Figure 2.</strong> Corn yield map.
   </figcaption>
 </figure>
+
+<div style="background:#fff8e1; border:1px solid #F9C74F; border-left:6px solid #F9C74F;
+            border-radius:8px; padding:12px 16px; font-size:0.88rem; color:#555; margin-bottom:8px;">
+  📊 <strong>Coming soon:</strong> yield summary statistics and Control vs Treatment comparison charts will be added once the yield CSV data is available.
+</div>
 ```
-
-```{r yield-cards, echo=FALSE}
-section_cards(m_cover_yield, m_ctrl_yield, delta_yield, pct_yield, p_yield,
-              "#0d9488", "#e879a0")
-```
-
-::: {.panel-tabset}
-
-## Density
-
-```{r yield-density, echo=FALSE, message=FALSE, warning=FALSE}
-p <- ggplot(df_yield, aes(x = yield, fill = treatment, color = treatment)) +
-  geom_density(alpha = 0.35, linewidth = 0.8) +
-  scale_fill_manual(values  = pal, labels = c("control" = "Control (Mow)", "treatment" = "Treatment (No-mowing)")) +
-  scale_color_manual(values = pal, labels = c("control" = "Control (Mow)", "treatment" = "Treatment (No-mowing)")) +
-  labs(
-    title    = "Corn Yield Distribution by Treatment",
-    subtitle = paste0("Treatment − Control = ", delta_yield, " t/ha (", pct_yield, "%) · ", p_yield,
-                      " · n = ", n_ctrl_yield, " (Control), ", n_cover_yield, " (Treatment)"),
-    x = "Yield (t/ha)", y = "Density",
-    fill = NULL, color = NULL
-  ) +
-  theme_minimal(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"), legend.position = "bottom",
-        panel.grid.minor = element_blank())
-
-ggplotly(p) |> layout(legend = list(orientation = "h", y = -0.2))
-```
-
-## Boxplot
-
-```{r yield-boxplot, echo=FALSE, message=FALSE, warning=FALSE}
-p <- ggplot(df_yield, aes(x = treatment, y = yield, fill = treatment, color = treatment)) +
-  geom_boxplot(alpha = 0.35, outlier.shape = NA, linewidth = 0.8, width = 0.4) +
-  scale_fill_manual(values  = pal, labels = c("control" = "Control (Mow)", "treatment" = "Treatment (No-mowing)")) +
-  scale_color_manual(values = pal, labels = c("control" = "Control (Mow)", "treatment" = "Treatment (No-mowing)")) +
-  scale_x_discrete(labels = c("control" = "Control (Mow)", "treatment" = "Treatment (No-mowing)")) +
-  labs(title = "Corn Yield by Treatment", subtitle = p_yield,
-       x = "Treatment", y = "Yield (t/ha)") +
-  theme_minimal(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"), legend.position = "none",
-        panel.grid.minor = element_blank())
-
-ggplotly(p) |> layout(showlegend = FALSE)
-```
-
-## Bar Chart (Mean ± SE)
-
-```{r yield-bar, echo=FALSE, message=FALSE, warning=FALSE}
-p <- ggplot(yield_stats, aes(x = treatment, y = mean, fill = treatment)) +
-  geom_col(width = 0.55, color = "black", alpha = 0.9) +
-  geom_errorbar(aes(ymin = mean - se, ymax = mean + se),
-                width = 0.15, linewidth = 1) +
-  scale_fill_manual(values = pal) +
-  scale_x_discrete(labels = c("control" = "Control (Mow)", "treatment" = "Treatment (No-mowing)")) +
-  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
-  labs(
-    title    = "Mean Corn Yield ± SE by Treatment",
-    subtitle = paste0("Difference: ", ifelse(delta_yield >= 0, "+", ""), delta_yield,
-                      " t/ha (", pct_yield, "%) · ", p_yield),
-    x = "Treatment", y = "Yield (t/ha)"
-  ) +
-  theme_minimal(base_size = 13) +
-  theme(legend.position = "none", plot.title = element_text(face = "bold"),
-        panel.grid.minor = element_blank())
-
-ggplotly(p) |> layout(showlegend = FALSE)
-```
-
-:::
-
-::: {style="font-size: 0.82rem; color: #9ca3af; margin-top: -8px;"}
-n = `r n_ctrl_yield` Control pixels · n = `r n_cover_yield` Treatment pixels. Two-sample Welch t-test; large n makes p-values very sensitive — interpret effect size (% difference) alongside significance.
-:::
-
-
 
 ---
 
@@ -874,17 +763,6 @@ HTML(paste0('
         ifelse(csnt_ctrl >= 250 & csnt_cover < 250,
           "The Control strip met the sufficiency threshold while Treatment did not.",
           "Neither treatment met the 250 ppm sufficiency threshold."))), '
-  </div>
-
-  <div class="conc-card teal">
-    <div class="conc-title">🌾 Corn Yield</div>
-    Treatment plots yielded <strong>', m_cover_yield, ' t/ha</strong> vs
-    <strong>', m_ctrl_yield, ' t/ha</strong> in Control
-    (<strong>', ifelse(delta_yield >= 0, "+", ""), pct_yield, '%</strong> difference, ', p_yield, ').
-    ', ifelse(tt_yield$p.value < 0.05,
-      paste0("The difference is statistically significant. However, with n = ", n_ctrl_yield + n_cover_yield,
-             " pixels, even small differences become significant — the ", abs(pct_yield), "% absolute difference is the more meaningful indicator."),
-      "The difference is not statistically significant, suggesting yield was similar across treatments under these conditions."), '
   </div>
 
 </div>
