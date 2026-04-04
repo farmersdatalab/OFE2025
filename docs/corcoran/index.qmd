@@ -41,6 +41,7 @@ data_dir <- "data"
 # ============================================================
 cn_file     <- "OFE2025_CN.csv"
 nrates_file <- "OFE2025_NRates.csv"
+yield_file  <- "OFE2025_Yield_Strips.csv"
 
 # ============================================================
 #  N RATES — LECTURA Y FILTRO CORCORAN
@@ -50,6 +51,33 @@ nrates_all <- read_csv(file.path(data_dir, nrates_file), show_col_types = FALSE)
 corc_nrates <- nrates_all |>
   filter(FarmName == "corcoran") |>
   rename(PlotID = PlotName, Nrate = Nrate_lbAc)
+
+# ============================================================
+#  YIELD — LECTURA Y FILTRO CORCORAN
+# ============================================================
+yield_all <- read_csv(file.path(data_dir, yield_file), show_col_types = FALSE)
+
+corc_yield <- yield_all |>
+  filter(FarmName == "Corcoran") |>
+  mutate(Treatment = factor(PlotName, levels = c("T0", "T1", "T2", "T3"))) |>
+  left_join(corc_nrates |> select(PlotID, Nrate),
+            by = c("PlotName" = "PlotID")) |>
+  mutate(
+    Nrate_label = paste0(Nrate, " lb N/ac"),
+    Trt_label   = paste0(Treatment, " (", Nrate, " lb N/ac)")
+  )
+
+yield_summary <- corc_yield |>
+  group_by(Treatment, Nrate) |>
+  summarise(
+    n         = n(),
+    mean_yield = round(mean(Yield_buAc, na.rm = TRUE), 1),
+    sd_yield  = round(sd(Yield_buAc,   na.rm = TRUE), 1),
+    .groups   = "drop"
+  ) |>
+  arrange(Treatment)
+
+ctrl_yield <- yield_summary |> filter(Treatment == "T0") |> pull(mean_yield)
 
 # ============================================================
 #  C:N BIOMASA — LECTURA Y CÁLCULO CORCORAN
@@ -199,23 +227,84 @@ This report summarizes the on-farm nitrogen rate experiment conducted in your fi
 ## Results Summary {#summary}
 
 ```{r summary-table, echo=FALSE, message=FALSE, warning=FALSE}
-summary_display <- cn_summary |>
-  mutate(
-    `Treatment` = paste0(Treatment, " (", Nrate, " lb N/ac)"),
-    `Mean %N`   = paste0(mean_N, " ± ", se_N),
-    `Mean C:N`  = paste0(mean_CN, " ± ", se_CN),
-    `n`         = n
-  ) |>
-  select(Treatment, n, `Mean %N`, `Mean C:N`)
+# Build yield row
+yield_row <- corc_yield |>
+  select(Treatment, Yield_buAc) |>
+  group_by(Treatment) |>
+  summarise(val = paste0(round(mean(Yield_buAc, na.rm=TRUE), 1), " bu/ac"), .groups="drop") |>
+  pivot_wider(names_from = Treatment, values_from = val) |>
+  mutate(Metric = "🌾 Corn Yield (bu/ac)", n = "1 per strip") |>
+  select(Metric, n, T0, T1, T2, T3)
+
+# Build CN rows
+cn_row_N <- cn_summary |>
+  mutate(val = paste0(mean_N, " ± ", se_N, "%")) |>
+  select(Treatment, val) |>
+  pivot_wider(names_from = Treatment, values_from = val) |>
+  mutate(Metric = "🧪 Biomass %N", n = "4 per strip") |>
+  select(Metric, n, T0, T1, T2, T3)
+
+cn_row_CN <- cn_summary |>
+  mutate(val = paste0(mean_CN, " ± ", se_CN)) |>
+  select(Treatment, val) |>
+  pivot_wider(names_from = Treatment, values_from = val) |>
+  mutate(Metric = "🧪 C:N Ratio", n = "4 per strip") |>
+  select(Metric, n, T0, T1, T2, T3)
+
+summary_display <- bind_rows(yield_row, cn_row_N, cn_row_CN)
 
 knitr::kable(summary_display,
-             align = c("l","c","c","c"),
-             caption = "Summary of corn biomass nitrogen (Mean ± SE) by N-rate treatment.")
+             col.names = c("Metric", "n", "T0 (60 lb N/ac)", "T1 (60 lb N/ac)", "T2 (50 lb N/ac)", "T3 (40 lb N/ac)"),
+             align = c("l","c","c","c","c","c"),
+             caption = "Summary of corn yield and biomass nitrogen by N-rate treatment.")
 ```
 
 ::: {style="font-size: 0.82rem; color: #9ca3af; margin-top: -8px;"}
 n = 4 samples per treatment. T0 = Control (farmer rate, 60 lb N/ac). Results are descriptive; effect sizes are reported given small sample sizes.
 :::
+
+---
+
+## 🌾 Corn Yield {#yield}
+
+::: {.page-intro}
+Corn yield was measured by strip across the four N-rate treatments (T0–T3). Each strip corresponds to one measurement. Because there is **one observation per treatment**, no statistical test is possible — results are presented as a field-level comparison.
+:::
+
+```{r yield-cards, echo=FALSE}
+nrate_cards(
+  yield_summary,
+  metric_col   = "mean_yield",
+  label_suffix = "bu/ac",
+  note         = "n = 1 per strip — field-level observation only."
+)
+```
+
+```{r yield-bar, echo=FALSE, message=FALSE, warning=FALSE}
+p_y <- ggplot(corc_yield,
+              aes(x = fct_reorder(paste0(PlotName, "\n(", Nrate, " lb N/ac)"), Nrate),
+                  y = Yield_buAc, fill = Treatment)) +
+  geom_col(width = 0.55, color = "black", alpha = 0.9) +
+  geom_hline(yintercept = ctrl_yield, linetype = "dashed",
+             color = "#e879a0", linewidth = 0.8) +
+  annotate("text", x = 0.6, y = ctrl_yield + 2,
+           label = paste0("T0 Control (", ctrl_yield, " bu/ac)"),
+           hjust = 0, size = 3.2, color = "#e879a0") +
+  scale_fill_manual(values = pal_trt) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
+  labs(
+    title   = "Corn Yield by N-Rate Treatment",
+    subtitle = "Dashed line = T0 Control (60 lb N/ac). n = 1 per strip.",
+    x       = "Treatment (N Rate)",
+    y       = "Yield (bu/ac)",
+    caption = "Single measurement per strip — field-level observation only."
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "none", plot.title = element_text(face = "bold"),
+        panel.grid.minor = element_blank())
+
+ggplotly(p_y) |> layout(showlegend = FALSE)
+```
 
 ---
 
@@ -405,6 +494,14 @@ Soil health was assessed using the **Cornell Soil Health Test**. The overall qua
 
 ```{r conclusion-callouts, echo=FALSE}
 # Compute deltas vs control for conclusion cards
+t1_yield <- corc_yield |> filter(PlotName == "T1") |> pull(Yield_buAc)
+t2_yield <- corc_yield |> filter(PlotName == "T2") |> pull(Yield_buAc)
+t3_yield <- corc_yield |> filter(PlotName == "T3") |> pull(Yield_buAc)
+
+delta_t1_yield <- round(t1_yield - ctrl_yield, 1)
+delta_t2_yield <- round(t2_yield - ctrl_yield, 1)
+delta_t3_yield <- round(t3_yield - ctrl_yield, 1)
+
 t2_N  <- cn_summary |> filter(Treatment == "T2") |> pull(mean_N)
 t3_N  <- cn_summary |> filter(Treatment == "T3") |> pull(mean_N)
 t2_CN <- cn_summary |> filter(Treatment == "T2") |> pull(mean_CN)
@@ -419,6 +516,9 @@ sign_t2_N  <- ifelse(delta_t2_N  >= 0, "+", "")
 sign_t3_N  <- ifelse(delta_t3_N  >= 0, "+", "")
 sign_t2_CN <- ifelse(delta_t2_CN >= 0, "+", "")
 sign_t3_CN <- ifelse(delta_t3_CN >= 0, "+", "")
+sign_t1_y  <- ifelse(delta_t1_yield >= 0, "+", "")
+sign_t2_y  <- ifelse(delta_t2_yield >= 0, "+", "")
+sign_t3_y  <- ifelse(delta_t3_yield >= 0, "+", "")
 
 HTML(paste0('
 <style>
@@ -445,6 +545,15 @@ HTML(paste0('
 </style>
 
 <div class="conclusion-grid">
+
+  <div class="conc-card teal">
+    <div class="conc-title">🌾 Corn Yield by N-Rate Strip</div>
+    T0 Control (60 lb N/ac) yielded <strong>', ctrl_yield, ' bu/ac</strong>.
+    T1 (60 lb N/ac): <strong>', t1_yield, ' bu/ac</strong> (', sign_t1_y, delta_t1_yield, ' vs Control).
+    T2 (50 lb N/ac): <strong>', t2_yield, ' bu/ac</strong> (', sign_t2_y, delta_t2_yield, ').
+    T3 (40 lb N/ac): <strong>', t3_yield, ' bu/ac</strong> (', sign_t3_y, delta_t3_yield, ').
+    Note: n = 1 per strip — these are field-level observations, not replicated results.
+  </div>
 
   <div class="conc-card teal">
     <div class="conc-title">🧪 Biomass %N — T2 vs Control (50 vs 60 lb N/ac)</div>
