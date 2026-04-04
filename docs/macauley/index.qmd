@@ -46,6 +46,7 @@ dualex_file <- "macauley_dualex_survey.csv"
 cn_file     <- "OFE2025_CN.csv"
 csnt_file   <- "OFE2025_CSNT.csv"
 nrates_file <- "OFE2025_NRates.csv"
+yield_file  <- "OFE2025_Yield_Strips.csv"
 
 # ============================================================
 #  N RATES — Field, NRate, Treatment, SampleID
@@ -60,6 +61,64 @@ nrates <- data.frame(
                     levels = c("Zero", "Low", "Farmer", "High")),
   stringsAsFactors = FALSE
 )
+
+# ============================================================
+#  YIELD — LECTURA Y PARSE DESDE PlotName (mac_BLK{b}_{t})
+#  TrtNum: 1=Zero(0), 2=Low(30), 3=Farmer(90), 4=High(150)
+# ============================================================
+yield_raw <- read_csv(file.path(data_dir, yield_file), show_col_types = FALSE)
+
+mac_yield <- yield_raw |>
+  filter(FarmName == "macauley") |>
+  mutate(
+    Block  = factor(str_extract(PlotName, "BLK[0-9]+")),
+    TrtNum = as.integer(str_extract(PlotName, "[0-9]+$")),
+    NGroup = factor(case_when(
+      TrtNum == 1 ~ "Zero",
+      TrtNum == 2 ~ "Low",
+      TrtNum == 3 ~ "Farmer",
+      TrtNum == 4 ~ "High"
+    ), levels = c("Zero", "Low", "Farmer", "High")),
+    Nrate  = case_when(
+      TrtNum == 1 ~   0,
+      TrtNum == 2 ~  30,
+      TrtNum == 3 ~  90,
+      TrtNum == 4 ~ 150
+    )
+  ) |>
+  filter(!is.na(NGroup), !is.na(Yield_buAc))
+
+# Summary by NGroup
+yield_summary <- mac_yield |>
+  group_by(NGroup, Nrate) |>
+  summarise(
+    n          = n(),
+    mean_yield = round(mean(Yield_buAc, na.rm = TRUE), 1),
+    sd_yield   = round(sd(Yield_buAc,   na.rm = TRUE), 1),
+    se_yield   = round(sd(Yield_buAc,   na.rm = TRUE) / sqrt(n()), 1),
+    .groups    = "drop"
+  )
+
+# ANOVA RCBD: Yield ~ NGroup + Block
+aov_yield  <- aov(Yield_buAc ~ NGroup + Block, data = mac_yield)
+emm_yield  <- emmeans(aov_yield, ~ NGroup)
+cld_yield  <- cld(emm_yield, Letters = letters, adjust = "tukey") |>
+  as_tibble() |>
+  mutate(
+    NGroup = factor(NGroup, levels = c("Zero", "Low", "Farmer", "High")),
+    letter = str_trim(.group)
+  )
+
+p_anova_yield <- summary(aov_yield)[[1]][["Pr(>F)"]][1]
+p_lab_yield   <- ifelse(p_anova_yield < 0.001, "p < 0.001",
+                        paste0("p = ", signif(p_anova_yield, 3)))
+
+# Linear regression: Yield ~ Nrate
+lm_yield       <- lm(Yield_buAc ~ Nrate, data = mac_yield)
+r2_yield       <- round(summary(lm_yield)$r.squared, 3)
+p_lm_yield     <- round(summary(lm_yield)$coefficients[2, 4], 4)
+p_lm_yield_lab <- ifelse(p_lm_yield < 0.001, "p < 0.001",
+                         paste0("p = ", signif(p_lm_yield, 3)))
 
 # ============================================================
 #  DUALEX — LECTURA Y LIMPIEZA
@@ -327,7 +386,7 @@ This report summarizes the on-farm nitrogen rate trial conducted in the Ntrials 
 ```
 
 ::: {.page-intro}
-**Take-home message:** I will populate this once yield data is available to answer the research question :)
+**Take-home message:** Yield data from the N-rate strips is now included alongside the nitrogen indicators. Together, these results address the core research question: whether applying cover crops allows a reduction in nitrogen fertilizer without sacrificing grain yield. Results from the ANOVA and dose-response regression are summarized below.
 :::
 
 ---
@@ -343,31 +402,36 @@ fmt1 <- function(x) {
 
 summary_df <- tibble(
   Metric = c(
+    "🌾 Corn Yield (bu/ac)",
     "🌿 NBI (Nitrogen Balance Index)",
     "🍃 Chlorophyll Index",
     "🧪 Biomass %N (C:N analysis)",
     "🌽 CSNT (Cornstalk Nitrate)"
   ),
-  `ANOVA p-value` = c(p_lab_nbi, p_lab_chl, p_lab_cn, p_lab_csnt),
+  `ANOVA p-value` = c(p_lab_yield, p_lab_nbi, p_lab_chl, p_lab_cn, p_lab_csnt),
   `Zero (0 lb N)` = c(
+    fmt1(round(filter(yield_summary, NGroup == "Zero")$mean_yield, 1)),
     fmt1(round(filter(cld_nbi,     treatment == "Zero")$emmean, 1)),
     fmt1(round(filter(cld_chl,     treatment == "Zero")$emmean, 1)),
     fmt1(round(filter(cn_summary,  NGroup    == "Zero")$mean_N, 1)),
     fmt1(round(filter(csnt_summary,NGroup    == "Zero")$mean_csnt, 0))
   ),
   `Low (30 lb N)` = c(
+    fmt1(round(filter(yield_summary, NGroup == "Low")$mean_yield, 1)),
     fmt1(round(filter(cld_nbi,     treatment == "Low")$emmean, 1)),
     fmt1(round(filter(cld_chl,     treatment == "Low")$emmean, 1)),
     fmt1(round(filter(cn_summary,  NGroup    == "Low")$mean_N, 1)),
     fmt1(round(filter(csnt_summary,NGroup    == "Low")$mean_csnt, 0))
   ),
   `Farmer (90 lb N)` = c(
+    fmt1(round(filter(yield_summary, NGroup == "Farmer")$mean_yield, 1)),
     fmt1(round(filter(cld_nbi,     treatment == "Farmer")$emmean, 1)),
     fmt1(round(filter(cld_chl,     treatment == "Farmer")$emmean, 1)),
     fmt1(round(filter(cn_summary,  NGroup    == "Farmer")$mean_N, 1)),
     fmt1(round(filter(csnt_summary,NGroup    == "Farmer")$mean_csnt, 0))
   ),
   `High (150 lb N)` = c(
+    fmt1(round(filter(yield_summary, NGroup == "High")$mean_yield, 1)),
     fmt1(round(filter(cld_nbi,     treatment == "High")$emmean, 1)),
     fmt1(round(filter(cld_chl,     treatment == "High")$emmean, 1)),
     fmt1(round(filter(cn_summary,  NGroup    == "High")$mean_N, 1)),
@@ -382,6 +446,75 @@ knitr::kable(summary_df, align = c("l","c","c","c","c","c"))
 Means shown. Letters from Tukey HSD test shown in individual section figures. ANOVA: one-way, 4 blocks × 4 treatments (RCBD).
 :::
 
+
+## 🌾 Corn Yield {#yield}
+
+::: {.page-intro}
+Corn yield was measured across all strips and joined to the N-rate treatment assignments. Results are compared across the four N-rate levels (Zero, Low, Farmer, High) using one-way ANOVA in a randomized complete block design. **Letters above bars indicate groups that differ significantly (Tukey HSD, p < 0.05).** A linear regression (yield ~ N rate) tests for a dose-response trend.
+:::
+
+```{r yield-cards, echo=FALSE}
+anova_cards(p_lab_yield,
+            val_zero = filter(yield_summary, NGroup == "Zero")$mean_yield,
+            val_high = filter(yield_summary, NGroup == "High")$mean_yield,
+            units = "bu/ac",
+            note  = paste0("Linear regression R² = ", r2_yield, " · ", p_lm_yield_lab))
+```
+
+::: {.panel-tabset}
+
+## Mean ± SE + Tukey
+
+```{r yield-bar, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3.5}
+cld_yield_plot <- cld_yield |>
+  left_join(yield_summary |> dplyr::select(NGroup, mean_yield, se_yield), by = "NGroup")
+
+p <- ggplot(cld_yield_plot, aes(x = NGroup, y = mean_yield, fill = NGroup)) +
+  geom_col(width = 0.6, color = "black", alpha = 0.9) +
+  geom_errorbar(aes(ymin = mean_yield - se_yield, ymax = mean_yield + se_yield),
+                width = 0.15, linewidth = 0.9) +
+  geom_text(aes(label = letter, y = mean_yield + se_yield + 3),
+            size = 5, fontface = "bold") +
+  scale_fill_manual(values = pal4) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
+  labs(
+    title    = "Corn Yield — Mean ± SE by N Rate",
+    subtitle = paste0("ANOVA ", p_lab_yield, " · Letters = Tukey HSD groups"),
+    x = "N Rate Treatment", y = "Yield (bu/ac)",
+    caption = "Error bars = ±SE. Same letter = no significant difference."
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "none", plot.title = element_text(face = "bold"),
+        panel.grid.minor = element_blank())
+
+ggplotly(p) |> config(displaylogo = FALSE) |> layout(showlegend = FALSE)
+```
+
+
+
+## Raw data by strip
+
+```{r yield-raw, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3.5}
+p <- ggplot(mac_yield, aes(x = NGroup, y = Yield_buAc,
+                                  color = NGroup, fill = NGroup)) +
+  geom_jitter(width = 0.15, size = 3, alpha = 0.7) +
+  stat_summary(fun = mean, geom = "crossbar", width = 0.4,
+               linewidth = 0.8, fatten = 2, color = "black") +
+  scale_color_manual(values = pal4) +
+  scale_fill_manual(values  = pal4) +
+  labs(title = "Individual Strip Yields by N Rate",
+       subtitle = "Horizontal bar = group mean",
+       x = "N Rate Treatment", y = "Yield (bu/ac)") +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "none", plot.title = element_text(face = "bold"),
+        panel.grid.minor = element_blank())
+
+ggplotly(p) |> config(displaylogo = FALSE) |> layout(showlegend = FALSE)
+```
+
+:::
+
+---
 
 ## 🌿 Nitrogen Balance Index (NBI) {#nbi-details}
 
@@ -610,28 +743,7 @@ p <- ggplot(cld_cn_plot, aes(x = NGroup, y = mean_N, fill = NGroup)) +
 ggplotly(p) |> config(displaylogo = FALSE) |> layout(showlegend = FALSE)
 ```
 
-## Scatter — dose response
 
-```{r cn-scatter, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3.5}
-p <- ggplot(mac_cn, aes(x = Nrate, y = TotalN_pct, color = NGroup)) +
-  geom_point(size = 3, alpha = 0.75) +
-  geom_smooth(aes(group = 1), method = "lm", se = TRUE,
-              color = "gray40", linetype = "dashed", linewidth = 0.9) +
-  scale_color_manual(values = pal4) +
-  scale_x_continuous(breaks = c(0, 30, 90, 150)) +
-  labs(
-    title    = "Biomass %N vs N Rate Applied",
-    subtitle = paste0("Linear regression: R² = ", r2_cn, " · ", p_lm_lab),
-    x = "N Rate Applied (lb N/ac)", y = "Total Nitrogen in Biomass (%)",
-    color = "N Group",
-    caption = "Each point = one sub-sample. Dashed line = linear trend ± 95% CI."
-  ) +
-  theme_minimal(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"), legend.position = "bottom",
-        panel.grid.minor = element_blank())
-
-ggplotly(p) |> config(displaylogo = FALSE) |> layout(legend = list(orientation = "h", x = 0.5, xanchor = "center", y = 1.05, yanchor = "bottom"))
-```
 
 ## Raw data points
 
@@ -700,30 +812,6 @@ p <- ggplot(cld_csnt_plot, aes(x = NGroup, y = mean_csnt, fill = NGroup)) +
         panel.grid.minor = element_blank())
 
 ggplotly(p) |> config(displaylogo = FALSE) |> layout(showlegend = FALSE)
-```
-
-## Scatter — dose response
-
-```{r csnt-scatter, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3.5}
-p <- ggplot(mac_csnt, aes(x = Nrate, y = CSNT_ppm, color = NGroup)) +
-  geom_point(size = 3, alpha = 0.75) +
-  geom_smooth(aes(group = 1), method = "lm", se = TRUE,
-              color = "gray40", linetype = "dashed", linewidth = 0.9) +
-  geom_hline(yintercept = 250, linetype = "dotted", color = "red", linewidth = 0.8) +
-  scale_color_manual(values = pal4) +
-  scale_x_continuous(breaks = c(0, 30, 90, 150)) +
-  labs(
-    title    = "CSNT vs N Rate Applied",
-    subtitle = "Dashed = linear trend · Red dotted = 250 ppm threshold",
-    x = "N Rate Applied (lb N/ac)", y = "CSNT (ppm)",
-    color = "N Group",
-    caption = "Each point = one stalk sample (E or W position)."
-  ) +
-  theme_minimal(base_size = 13) +
-  theme(plot.title = element_text(face = "bold"), legend.position = "bottom",
-        panel.grid.minor = element_blank())
-
-ggplotly(p) |> config(displaylogo = FALSE) |> layout(legend = list(orientation = "h", x = 0.5, xanchor = "center", y = 1.05, yanchor = "bottom"))
 ```
 
 ## Raw data by plot
@@ -812,6 +900,17 @@ HTML(paste0('
 </style>
 
 <div class="conclusion-grid">
+
+  <div class="conc-card teal">
+    <div class="conc-title">🌾 Corn Yield (', p_lab_yield, ')</div>
+    Mean yield ranged from <strong>', round(filter(yield_summary, NGroup=="Zero")$mean_yield,1), ' bu/ac</strong> (Zero)
+    to <strong>', round(filter(yield_summary, NGroup=="High")$mean_yield,1), ' bu/ac</strong> (High),
+    with the Farmer rate at <strong>', round(filter(yield_summary, NGroup=="Farmer")$mean_yield,1), ' bu/ac</strong>.
+    The linear regression showed R² = ', r2_yield, ' (', p_lm_yield_lab, ').
+    ', ifelse(p_anova_yield < 0.05,
+      "Significant yield differences among N rates were detected — higher N rates produced meaningfully more grain.",
+      "No significant yield differences were detected among N rates, suggesting the cover crop may be supplying sufficient N even at lower application rates."), '
+  </div>
 
   <div class="conc-card teal">
     <div class="conc-title">🌿 NBI (', p_lab_nbi, ')</div>
