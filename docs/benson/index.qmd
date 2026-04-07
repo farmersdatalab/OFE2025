@@ -1045,8 +1045,26 @@ Soil health was assessed using the **Cornell Soil Health Test**. The overall qua
     ↗ Open Full Soil Health Report (PDF)
   </a>
 </div>
-```
 
+```
+---
+
+## 🌧️Weather & Drought Conditions {#weatherDrought}
+
+::: {.page-intro}
+**Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index from June through November 2025.  
+:::
+```{=html}
+<figure style="margin: 0 0 24px; text-align: center;">
+  <img
+    src="images/benson_weather.png"
+    alt="Weather and drought conditions 2025"
+    style="max-width: 100%; border-radius: 8px; border: 1px solid #e5e7eb;
+           box-shadow: 0 2px 8px rgba(0,0,0,0.07);"
+    onerror="this.style.display='none'"
+  />
+</figure>
+```
 ---
 
 ## 📝 Conclusion {#conclusion}
