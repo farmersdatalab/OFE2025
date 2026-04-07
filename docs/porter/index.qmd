@@ -398,6 +398,18 @@ The map below shows the **corn yield spatial distribution** across Field G7, dis
     <strong>Figure 2.</strong> Corn yield map.
   </figcaption>
 </figure>
+<div style="margin: 16px 0 24px; text-align: center;">
+  <a href="https://farmersdatalab.github.io/5c9e1a7d-8f44-4b2a-9d3c-6e7a1f2b0c55/"
+     target="_blank"
+     rel="noopener noreferrer"
+     style="display: inline-flex; align-items: center; gap: 8px;
+            background: #0d9488; color: #fff; font-weight: 600;
+            padding: 10px 20px; border-radius: 8px; text-decoration: none;
+            font-size: 0.95rem; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            transition: opacity 0.2s;">
+    🗺️ Open Interactive NDVI Map
+  </a>
+</div>
 ```
 
 ```{r yield-cards, echo=FALSE}

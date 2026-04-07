@@ -309,10 +309,23 @@ The map below shows the **corn yield spatial distribution** across field 302-3, 
               box-shadow:0 2px 8px rgba(0,0,0,0.07);"
        onerror="this.style.display='none'" />
   <figcaption style="font-size:0.82rem; color:#6b7280; margin-top:8px;">
-    <strong>Figure 2.</strong> Corn yield spatial distribution (quantile color scale). Blue lines = N rate plot boundaries.
+    <strong>Figure 2.</strong> Corn yield spatial distribution. Blue lines = N rate plot boundaries.
   </figcaption>
 </figure>
 
+
+<div style="margin: 16px 0 24px; text-align: center;">
+  <a href="https://farmersdatalab.github.io/8a7d2e11-5c39-4f0f-9c3a-2d6b7e1a4f90/"
+     target="_blank"
+     rel="noopener noreferrer"
+     style="display: inline-flex; align-items: center; gap: 8px;
+            background: #0d9488; color: #fff; font-weight: 600;
+            padding: 10px 20px; border-radius: 8px; text-decoration: none;
+            font-size: 0.95rem; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            transition: opacity 0.2s;">
+    🗺️ Open Interactive NDVI Map
+  </a>
+</div>
 ```
 
 ::: {.page-intro}
