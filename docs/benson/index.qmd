@@ -345,7 +345,7 @@ cn_cards <- function(mean_cover, mean_nocover, pct_inc, cohen_d, label_metric, n
       </span>
     </div>
     <div class="lab-topbar__right">
-      <a class="btn btn-download" href="benson_index.pdf" title="Download PDF version">
+      <a class="btn btn-download" href="benson.pdf" title="Download PDF version">
         ⬇ Download PDF
       </a>
     </div>
