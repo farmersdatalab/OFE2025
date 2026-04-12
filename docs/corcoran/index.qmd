@@ -187,7 +187,7 @@ nrate_cards <- function(summary_df, metric_col, label_suffix, note = "") {
       </span>
     </div>
     <div class="lab-topbar__right">
-      <a class="btn btn-download" href="index.pdf" title="Download PDF version">
+      <a class="btn btn-download" href="index.pdf" title="Download PDF version"target="_blank" rel="noopener noreferrer">
         ⬇ Download PDF
       </a>
     </div>
@@ -213,7 +213,7 @@ This report summarizes the on-farm nitrogen rate experiment conducted in your fi
     📍 Field map — place <code>corcoran_field.png</code> in the <code>images/</code> folder
   </div>
   <figcaption style="font-size: 0.82rem; color: #6b7280; margin-top: 8px;">
-    <strong>Figure 1.</strong> N-rate trial — treatment layout.
+    <strong>Figure 1.</strong> Treatment layout.
   </figcaption>
 </figure>
 <div style="margin: 16px 0 24px; text-align: center;">
@@ -231,7 +231,7 @@ This report summarizes the on-farm nitrogen rate experiment conducted in your fi
 ```
 
 ::: {.page-intro}
-**Take-home message:** Corn biomass was analyzed for nitrogen concentration (%N) and C:N ratio across four N-rate strips. If the cover crop provides meaningful N credit, we would expect T2 (50 lb N/ac) and T3 (40 lb N/ac) to achieve nitrogen status comparable to the control (T0, 60 lb N/ac). Results are presented below.
+**Take-home message:** In this first season, reducing nitrogen from 60 to 40–50 lb N/ac after a cover crop resulted in only minor differences in plant tissue nitrogen, biomass %N and C:N ratios were close to the Control across all strips. Yield was lower in the reduced-rate strips, but T1, which received the same rate as the Control, also yielded less, suggesting the field itself varies more than the N rate effect. With only one strip per treatment, it's difficult to draw firm conclusions. The cover crop system shows promise, and repeating this trial with more replication will be key to understanding its true nitrogen contribution.
 :::
 
 ---
@@ -280,7 +280,7 @@ n = 4 samples per treatment. T0 = Control (farmer rate, 60 lb N/ac). Results are
 ## 🌾 Corn Yield {#yield}
 
 ::: {.page-intro}
-Corn yield was measured by strip across the four N-rate treatments (T0–T3). Each strip corresponds to one measurement. Because there is **one observation per treatment**, no statistical test is possible — results are presented as a field-level comparison.
+Corn yield was measured by strip across the four N-rate treatments (T0–T3). Each strip corresponds to one measurement. Because there is **one observation per treatment**, no statistical test is possible. Results are presented as a field-level comparison.
 :::
 
 ```{r yield-cards, echo=FALSE}
@@ -299,9 +299,6 @@ p_y <- ggplot(corc_yield,
   geom_col(width = 0.55, color = "black", alpha = 0.9) +
   geom_hline(yintercept = ctrl_yield, linetype = "dashed",
              color = "#e879a0", linewidth = 0.8) +
-  annotate("text", x = 0.6, y = ctrl_yield + 2,
-           label = paste0("T0 Control (", ctrl_yield, " bu/ac)"),
-           hjust = 0, size = 3.2, color = "#e879a0") +
   scale_fill_manual(values = pal_trt) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
   labs(
@@ -348,9 +345,6 @@ p_n <- ggplot(cn_summary, aes(x = fct_reorder(paste0(Treatment, "\n(", Nrate, " 
   geom_errorbar(aes(ymin = mean_N - se_N, ymax = mean_N + se_N),
                 width = 0.15, linewidth = 1) +
   geom_hline(yintercept = ctrl_N, linetype = "dashed", color = "#e879a0", linewidth = 0.8) +
-  annotate("text", x = 0.6, y = ctrl_N + 0.02,
-           label = paste0("Control (%N = ", ctrl_N, ")"),
-           hjust = 0, size = 3.2, color = "#e879a0") +
   
 scale_fill_manual(values = pal_trt) +
   coord_cartesian(ylim = c(0, 3.8)) + 
@@ -423,10 +417,7 @@ p_cn <- ggplot(cn_summary, aes(x = fct_reorder(paste0(Treatment, "\n(", Nrate, "
   geom_errorbar(aes(ymin = mean_CN - se_CN, ymax = mean_CN + se_CN),
                 width = 0.15, linewidth = 1) +
   geom_hline(yintercept = ctrl_CN, linetype = "dashed", color = "#e879a0", linewidth = 0.8) +
-  annotate("text", x = 0.6, y = ctrl_CN + 0.1,
-           label = paste0("Control (C:N = ", ctrl_CN, ")"),
-           hjust = 0, size = 3.2, color = "#e879a0") +
-  scale_fill_manual(values = pal_trt) +
+   scale_fill_manual(values = pal_trt) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
   labs(
     title    = "C:N Ratio in Corn Biomass (Mean ± SE)",
@@ -519,7 +510,7 @@ Soil health was assessed using the **Cornell Soil Health Test**. The overall qua
 ```
 ---
 
-## 📝 Conclusion {#conclusion}
+## 📝 Conclusions {#conclusions}
 
 ```{r conclusion-callouts, echo=FALSE}
 # Compute deltas vs control for conclusion cards
@@ -575,52 +566,41 @@ HTML(paste0('
 
 <div class="conclusion-grid">
 
-  <div class="conc-card teal">
-    <div class="conc-title">🌾 Corn Yield by N-Rate Strip</div>
-    T0 Control (60 lb N/ac) yielded <strong>', ctrl_yield, ' bu/ac</strong>.
-    T1 (60 lb N/ac): <strong>', t1_yield, ' bu/ac</strong> (', sign_t1_y, delta_t1_yield, ' vs Control).
-    T2 (50 lb N/ac): <strong>', t2_yield, ' bu/ac</strong> (', sign_t2_y, delta_t2_yield, ').
-    T3 (40 lb N/ac): <strong>', t3_yield, ' bu/ac</strong> (', sign_t3_y, delta_t3_yield, ').
-    Note: n = 1 per strip — these are field-level observations, not replicated results.
-  </div>
+ <div class="conc-card teal">
+  <div class="conc-title">🌾 Corn Yield</div>
+  The Control strip (T0, 60 lb N/ac) yielded <strong>204 bu/ac</strong>.
+  Both reduced-rate strips were lower: T2 (50 lb N/ac) at <strong>178 bu/ac</strong>
+  and T3 (40 lb N/ac) at <strong>180 bu/ac</strong>. Notably, T1 — which received
+  the same 60 lb N/ac as the Control — yielded only <strong>185 bu/ac</strong>,
+  suggesting that field spatial variability is influencing results more than
+  N rate alone. With one strip per treatment, these are observations, not conclusions.
+</div>
 
-  <div class="conc-card teal">
-    <div class="conc-title">🧪 Biomass %N — T2 vs Control (50 vs 60 lb N/ac)</div>
-    T2 (50 lb N/ac) showed a mean biomass %N of <strong>', t2_N, '%</strong>
-    compared to Control at <strong>', ctrl_N, '%</strong>
-    (difference: ', sign_t2_N, delta_t2_N, '%). The C:N ratio for T2 was ',
-    t2_CN, ' vs Control at ', ctrl_CN,
-    ' (', sign_t2_CN, delta_t2_CN, '). With only 4 samples per treatment,
-    this is a descriptive finding — a promising signal to monitor in future seasons.
-  </div>
+<div class="conc-card teal">
+  <div class="conc-title">🧪 Biomass %N</div>
+  Tissue nitrogen was similar across all strips: T0 = <strong>3.49%</strong>,
+  T2 = <strong>3.37%</strong>, T3 = <strong>3.42%</strong>. The reduced-rate
+  strips came in slightly below the Control, but the differences are small —
+  less than 0.12 percentage points. T1 (same rate as Control) was the lowest
+  at 3.22%, again reflecting field variability rather than an N rate effect.
+</div>
 
-  <div class="conc-card amber">
-    <div class="conc-title">🧪 Biomass %N — T3 vs Control (40 vs 60 lb N/ac)</div>
-    T3 (40 lb N/ac) showed a mean biomass %N of <strong>', t3_N, '%</strong>
-    compared to Control at <strong>', ctrl_N, '%</strong>
-    (difference: ', sign_t3_N, delta_t3_N, '%). The C:N ratio for T3 was ',
-    t3_CN, ' vs Control at ', ctrl_CN,
-    ' (', sign_t3_CN, delta_t3_CN, '). Results should be interpreted with caution
-    given the small sample size (n = 4).
-  </div>
+<div class="conc-card amber">
+  <div class="conc-title">🧪 C:N Ratio</div>
+  The Control (T0) had a C:N of <strong>13.14</strong>. T2 (13.78) and T3 (13.85)
+  were slightly higher — meaning slightly less nitrogen-rich tissue — but still
+  very close to the Control. T1 had the highest C:N (14.53) despite receiving
+  the same N rate, which points to spatial variability within the field rather
+  than a treatment effect.
+</div>
 
-  <div class="conc-card">
-    <div class="conc-title">🌱 Soil Health Context</div>
-    The Cornell Soil Health Assessment (Overall Score: <strong>63/High</strong>) identified
-    low biological activity as the main constraint — Organic Matter (21), Soil Respiration (28),
-    and Aggregate Stability (29) are all in the Low range. These indicators suggest that
-    the cover crop system has room to build soil biology over time, which may increase
-    N mineralization and support N credit in future seasons.
-  </div>
-
-  <div class="conc-card pink">
-    <div class="conc-title">📌 Next Steps</div>
-    Continue the N-rate trial in future seasons with larger sample sizes to enable
-    formal statistical testing. Monitoring end-of-season biomass and yield alongside
-    in-season nitrogen status (Dualex) would strengthen the evidence base. The consistent
-    design across strips makes this field well-positioned for multi-year analysis.
-  </div>
-
+<div class="conc-card">
+  <div class="conc-title">🌱 Soil Health</div>
+  The overall score was <strong>63/100 (High)</strong>, with excellent chemical
+  indicators (pH, P, K all near 100). The main gap is biological activity —
+  Organic Matter (21), Soil Respiration (28), and Aggregate Stability (29) are
+  all Low. As cover cropping continues, these scores should improve, potentially
+  increasing nitrogen mineralization and the effective N credit from the cover crop.
 </div>
 '))
 ```

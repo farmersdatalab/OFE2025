@@ -229,7 +229,7 @@ cn_cards <- function(mean_cover, mean_nocover, pct_inc, cohen_d, label_metric, n
       <div class="sc-label">Treatment — ', label_metric, '</div>
       <div class="sc-main">
         <span class="sc-val">', mean_cover, '</span>
-        <span class="sc-delta">&#8593; +', pct_inc, '% vs Control</span>
+        <span class="sc-delta">', ifelse(pct_inc >= 0, "&#8593; +", "&#8595; "), pct_inc, '% vs Control</span>
       </div>
       <div class="sc-sub">Control mean: ', mean_nocover, '</div>
     </div>
@@ -260,8 +260,8 @@ cn_cards <- function(mean_cover, mean_nocover, pct_inc, cohen_d, label_metric, n
       </span>
     </div>
     <div class="lab-topbar__right">
-      <a class="btn btn-download" href="index.pdf" title="Download PDF version">
-        ⬇ Download PDF
+       <a class="btn btn-download" href="index.pdf" title="Download PDF version" target="_blank" rel="noopener noreferrer">
+  ⬇ Download PDF
       </a>
     </div>
   </div>
@@ -278,7 +278,7 @@ This report summarizes the on-farm nitrogen experiment conducted in your field, 
   <img
     src="images/villnave_field.png"
     alt="Villnave field — treatment map"
-    style="max-width: 100%; border-radius: 8px; border: 1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,0.07);"
+    style="max-width: 80%; border-radius: 8px; border: 1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,0.07);"
     onerror="this.style.display='none'; document.getElementById('field-placeholder').style.display='block'"
   />
   <div id="field-placeholder" style="display:none; background:#f3f4f6; border-radius:8px;
@@ -286,10 +286,9 @@ This report summarizes the on-farm nitrogen experiment conducted in your field, 
     📍 Field map — place <code>villnave_field.png</code> in the <code>images/</code> folder
   </div>
   <figcaption style="font-size: 0.82rem; color: #6b7280; margin-top: 8px;">
-    <strong>Figure 1.</strong> Villnave Field 3 — treatment layout.
+    <strong>Figure 1.</strong> Field 3 — treatment layout.
     <span style="background:#0d9488; color:#fff; border-radius:4px; padding:1px 7px; font-size:0.78rem; margin-left:4px;">■ Treatment</span>
     <span style="background:#e879a0; color:#fff; border-radius:4px; padding:1px 7px; font-size:0.78rem; margin-left:4px;">■ Control</span>
-    &nbsp;·&nbsp; Cover crop species: <em>[species TBD]</em>
   </figcaption>
 </figure>
 ```
@@ -343,15 +342,15 @@ knitr::kable(summary_df, align = c("l","c","c","c","c"))
 ## 🌾 Corn Yield {#yield}
 
 ::: {.page-intro}
-The map below shows the **corn yield spatial distribution** across Field 3, displayed in quantiles. The blue line marks the field boundary and the dashed line separates the two sub-fields.
+The map below shows the **corn yield spatial distribution** across Field 3, displayed in quantiles.
 :::
 
 ```{=html}
 <figure style="margin: 20px 0; text-align: center;">
   <img
     src="images/villnave_yield.png"
-    alt="Villnave Field 3 — Corn yield map"
-    style="max-width: 80%; border-radius: 8px; border: 1px solid #e5e7eb;
+    alt="Field 3 — Corn yield map"
+    style="max-width: 70%; border-radius: 8px; border: 1px solid #e5e7eb;
            box-shadow: 0 2px 8px rgba(0,0,0,0.07);"
     onerror="this.style.display='none'"
   />
@@ -369,7 +368,7 @@ The map below shows the **corn yield spatial distribution** across Field 3, disp
             padding: 10px 20px; border-radius: 8px; text-decoration: none;
             font-size: 0.95rem; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
             transition: opacity 0.2s;">
-    🗺️ Open Interactive NDVI Map
+    🗺️ Open Interactive Map
   </a>
 </div>
 ```
@@ -415,9 +414,9 @@ ggplotly(p) |> layout(legend = list(orientation="h", y=-0.2))
 p <- ggplot(df_avg, aes(x=treatment, y=nbi, fill=treatment, color=treatment)) +
   geom_boxplot(alpha=0.35, outlier.shape=NA, linewidth=0.8, width=0.4) +
   geom_jitter(width=0.15, alpha=0.5, size=1.8) +
-  scale_fill_manual(values  = pal, labels = c("control"="Control","treatment"="Treatment")) +
-  scale_color_manual(values = pal, labels = c("control"="Control","treatment"="Treatment")) +
-  scale_x_discrete(labels = c("control"="Control","treatment"="Treatment")) +
+  scale_fill_manual(values  = pal, labels = c("control"="control","treatment"="treatment")) +
+  scale_color_manual(values = pal, labels = c("control"="control","treatment"="treatment")) +
+  scale_x_discrete(labels = c("control"="control","treatment"="treatment")) +
   labs(title="Nitrogen Balance Index (NBI) by Treatment", subtitle=p_nbi,
        x="Treatment", y="Nitrogen Balance Index (Dualex)") +
   theme_minimal(base_size=13) +
@@ -449,8 +448,8 @@ section_cards(m_cover_chl, m_ctrl_chl, delta_chl, pct_chl, p_chl,
 ```{r chl-density, echo=FALSE, message=FALSE, warning=FALSE}
 p <- ggplot(df_avg, aes(x=chl, fill=treatment, color=treatment)) +
   geom_density(alpha=0.35, linewidth=0.8) +
-  scale_fill_manual(values  = pal, labels = c("control"="Control","treatment"="Treatment")) +
-  scale_color_manual(values = pal, labels = c("control"="Control","treatment"="Treatment")) +
+  scale_fill_manual(values  = pal, labels = c("control"="control","treatment"="treatment")) +
+  scale_color_manual(values = pal, labels = c("control"="control","treatment"="treatment")) +
   labs(
     title    = "Chlorophyll (Chl) — Plant Average",
     subtitle = paste0("Cover − Control = ", delta_chl, " (", pct_chl, "%) · ", p_chl),
@@ -470,9 +469,9 @@ ggplotly(p) |> layout(legend=list(orientation="h", y=-0.2))
 p <- ggplot(df_avg, aes(x=treatment, y=chl, fill=treatment, color=treatment)) +
   geom_boxplot(alpha=0.35, outlier.shape=NA, linewidth=0.8, width=0.4) +
   geom_jitter(width=0.15, alpha=0.5, size=1.8) +
-  scale_fill_manual(values  = pal, labels = c("control"="Control","treatment"="Treatment")) +
-  scale_color_manual(values = pal, labels = c("control"="Control","treatment"="Treatment")) +
-  scale_x_discrete(labels = c("control"="Control","treatment"="Treatment")) +
+  scale_fill_manual(values  = pal, labels = c("control"="control","treatment"="treatment")) +
+  scale_color_manual(values = pal, labels = c("control"="control","treatment"="treatment")) +
+  scale_x_discrete(labels = c("control"="control","treatment"="treatment")) +
   labs(title="Chlorophyll (Chl) by Treatment", subtitle=p_chl,
        x="Treatment", y="Chlorophyll Index (Dualex)") +
   theme_minimal(base_size=13) +
@@ -631,7 +630,7 @@ ggplotly(p_raw_CN) |> layout(showlegend = FALSE)
 ## 🌽 Cornstalk Nitrate Test (CSNT) {#csnt-details}
 
 ::: {.page-intro}
-The Cornstalk Nitrate Test (CSNT) measures nitrate concentration in the lower cornstalk at the end of the season. It is a post-harvest diagnostic tool: values **above 250 ppm** suggest the crop had sufficient nitrogen; values **below 250 ppm** suggest nitrogen was limiting. Because only **one sample per treatment** was collected, no statistical comparison is possible — this is a field-level observation.
+The Cornstalk Nitrate Test (CSNT) measures nitrate concentration in the lower cornstalk at the end of the season. It is a post-harvest diagnostic tool: values **below 250 ppm indicate insufficient nitrogen**, while the **optimal range is between 750 and 2000 ppm**. Because only **one sample per treatment** was collected, no statistical comparison is possible — this is a field-level observation.
 :::
 
 ```{r csnt-card, echo=FALSE}
@@ -658,9 +657,8 @@ HTML(paste0('
 ```{r csnt-plot, echo=FALSE, message=FALSE, warning=FALSE}
 p_csnt <- ggplot(vill_csnt, aes(x = Treatment, y = CSNT_ppm, fill = Treatment)) +
   geom_col(width = 0.5, color = "black", alpha = 0.9) +
-  geom_hline(yintercept = 250, linetype = "dashed", color = "gray40", linewidth = 0.8) +
-  annotate("text", x = 0.55, y = 290, label = "Sufficient N threshold: 250 ppm",
-           hjust = 0, size = 3.5, color = "gray40") +
+      geom_hline(yintercept = 250, linetype = "dashed", color = "#e57373", linewidth = 0.8) +
+  geom_hline(yintercept = 750, linetype = "dashed", color = "#66bb6a", linewidth = 0.8) +
   scale_fill_manual(values = c("Control" = "#e879a0", "Treatment" = "#0d9488")) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
   labs(
@@ -725,7 +723,7 @@ Soil health was assessed using the **Cornell Soil Health Test** (sampled 06/11/2
 ```
 ---
 
-## 📝 Conclusion {#conclusion}
+## 📝 Conclusions {#conclusions}
 
 ```{r conclusion-callouts, echo=FALSE}
 HTML(paste0('
@@ -755,38 +753,45 @@ HTML(paste0('
 <div class="conclusion-grid">
 
   <div class="conc-card teal">
-    <div class="conc-title">🌿 Leaf Nitrogen Status (NBI)</div>
-    Treatment plots showed a <strong>', pct_nbi, '% higher NBI</strong> compared to control
-    (', m_cover_nbi, ' vs ', m_ctrl_nbi, '). This difference was statistically significant
-    (', p_nbi, '), indicating that corn plants in cover crop strips had
-    better in-season nitrogen status at the time of measurement.
-  </div>
+  <div class="conc-title">🌿 Leaf Nitrogen Status (NBI)</div>
+  Treatment plots showed a <strong>12.8% higher NBI</strong> compared to Control
+  (76 vs 67.4), indicating that corn plants in cover crop strips had
+  significantly better in-season nitrogen status at the time of measurement.
+</div>
 
   <div class="conc-card">
-    <div class="conc-title">🍃 Chlorophyll Index (Chl)</div>
-    Chlorophyll values were also higher in cover crop plots
-    (<strong>+', pct_chl, '%</strong>; ', p_chl, '), consistent with
-    the NBI result. Higher chlorophyll reflects greener, more nitrogen-sufficient
-    leaves — a direct sign of improved N uptake.
-  </div>
+  <div class="conc-title">🍃 Chlorophyll Index (Chl)</div>
+  Chlorophyll values were also higher in cover crop plots
+  (<strong>+6.6%</strong>), consistent with the NBI result.
+  Higher chlorophyll reflects greener, more nitrogen-sufficient leaves,
+  a direct sign of improved N uptake in the treatment strips.
+</div>
 
-  <div class="conc-card amber">
-    <div class="conc-title">🧪 Biomass Nitrogen (%N)</div>
-    Laboratory analysis of corn biomass at V6 showed treatment plants had
-    <strong>+', perc_N, '% more nitrogen</strong> in their tissue
-    (', mean_cover_N, '% vs ', mean_nocover_N, '%). The effect size (Cohen\'s d =
-    ', round(d_N_cn$Cohens_d, 2), ') suggests a meaningful biological difference,
-    though the small sample size prevents formal statistical testing.
-  </div>
+<div class="conc-card amber">
+  <div class="conc-title">🧪 Biomass Nitrogen (%N)</div>
+  Laboratory analysis of corn biomass showed treatment plants had
+  <strong>+17.6% more nitrogen</strong> in their tissue (2.286% vs 1.944%). The effect size (Cohens d = -0.57) suggests a meaningful biological difference, although the small sample size prevents  formal statistical testing.
+</div>
 
   <div class="conc-card pink">
-    <div class="conc-title">🌽 End-of-Season CSNT</div>
-    The Cornstalk Nitrate Test provides a season-end snapshot of whether the crop
-    ran short of nitrogen. Values above 250 ppm indicate adequate N supply.
-    Results for this field are presented in the CSNT section above.
-    Combined with the in-season Dualex readings and biomass data, this helps
-    build a complete picture of nitrogen dynamics in Field 3.
-  </div>
+  <div class="conc-title">🌽 End-of-Season CSNT</div>
+  The Cornstalk Nitrate Test showed a striking difference: Control at
+  <strong>79 ppm</strong>, well below the 250 ppm sufficiency threshold, 
+  versus Treatment at <strong>938 ppm</strong>, within the optimal range
+  (750–2000 ppm). This suggests that control plots may have experienced
+  nitrogen deficiency late in the season, while cover crop strips maintained
+  adequate N supply through harvest.
+</div>
+
+<div class="conc-card teal">
+  <div class="conc-title">🌱 Soil Health</div>
+  The overall soil health score of <strong>69/100 (High)</strong> reflects
+  good physical structure but low biological activity, particularly Soil
+  Respiration (score 16) and Active Carbon (score 34). Continued cover
+  cropping could directly address these constraints by feeding soil microbial
+  communities and building organic matter over time.
+</div>
+
 
 </div>
 '))

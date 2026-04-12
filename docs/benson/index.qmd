@@ -218,22 +218,18 @@ bens_nrate_val <- bens_nrate[1]  # 74.5
 yield_file <- "benson_yield.csv"
 
 bens_yield <- read_csv(file.path(data_dir, yield_file), show_col_types = FALSE) |>
-  rename(yield_mgha = Yield) |>
+  rename(yield_buac = Yield) |>       # renombra directo como bu/ac
   mutate(
-    yield_buac = yield_mgha * 14.87,
-    Treatment  = factor(Treatment, levels = c("No Cover", "Cover"))
+    Treatment = factor(Treatment, levels = c("No Cover", "Cover"))
   )
 
 yield_summary <- bens_yield |>
   group_by(Treatment) |>
   summarise(
     n          = n(),
-    mean_mgha  = round(mean(yield_mgha,  na.rm = TRUE), 3),
-    median_mgha= round(median(yield_mgha,na.rm = TRUE), 3),
-    sd_mgha    = round(sd(yield_mgha,    na.rm = TRUE), 3),
-    mean_buac  = round(mean(yield_buac,  na.rm = TRUE), 1),
-    median_buac= round(median(yield_buac,na.rm = TRUE), 1),
-    sd_buac    = round(sd(yield_buac,    na.rm = TRUE), 1),
+    mean_buac  = round(mean(yield_buac,   na.rm = TRUE), 1),
+    median_buac= round(median(yield_buac, na.rm = TRUE), 1),
+    sd_buac    = round(sd(yield_buac,     na.rm = TRUE), 1),
     .groups    = "drop"
   )
 
@@ -285,10 +281,10 @@ section_cards <- function(mean_cover, mean_ctrl, delta, pct, p_val,
 
   <div class="sc-row">
     <div class="sc" style="border-top: 4px solid ', color_cover, '">
-      <div class="sc-label">Cover (Treatment)</div>
+      <div class="sc-label">Treatment</div>
       <div class="sc-main">
         <span class="sc-val">', fmt(mean_cover), '</span>
-        <span class="sc-delta">', sign_fmt(delta), ' vs control (', pct, '%)</span>
+        <span class="sc-delta">', ifelse(delta >= 0, "&#8593;", "&#8595;"), ' ', sign_fmt(delta), ' vs control (', pct, '%)</span>
       </div>
       <div class="sc-sub">Control mean: ', fmt(mean_ctrl), '</div>
     </div>
@@ -311,10 +307,10 @@ cn_cards <- function(mean_cover, mean_nocover, pct_inc, cohen_d, label_metric, n
   HTML(paste0('
   <div class="sc-row">
     <div class="sc" style="border-top: 4px solid #0d9488">
-      <div class="sc-label">Cover (Treatment) — ', label_metric, '</div>
+      <div class="sc-label">Treatment — ', label_metric, '</div>
       <div class="sc-main">
         <span class="sc-val">', mean_cover, '</span>
-        <span class="sc-delta">', sign_fmt(pct_inc), '% vs Control</span>
+        <span class="sc-delta">', ifelse(pct_inc >= 0, "&#8593;", "&#8595;"), ' ', sign_fmt(pct_inc), '% vs Control</span>
       </div>
       <div class="sc-sub">Control mean: ', mean_nocover, '</div>
     </div>
@@ -367,14 +363,14 @@ This report summarizes the on-farm nitrogen experiment conducted in your Kolb2 f
     onerror="this.style.display='none'"
   />
   <figcaption style="font-size: 0.82rem; color: #6b7280; margin-top: 8px;">
-    <strong>Figure 1.</strong> Benson Kolb2 — treatment layout.
-        &nbsp;·&nbsp; Cover crop species: <em>Clover</em>
+    <strong>Figure 1.</strong> Kolb2 — treatment layout.
+        &nbsp;·&nbsp; Cover crop: <em>Clover</em>
   </figcaption>
 </figure>
 ```
 
 ::: {.page-intro}
-**Take-home message:** Across all in-season nitrogen indicators (NBI, chlorophyll, biomass %N, and grain %N) corn plants in the clover cover crop strips consistently showed higher nitrogen status than control plots, and this translated into a meaningful yield advantage of +16 bu/ac (+11.8%) at harvest. That said, end-of-season cornstalk nitrate values fell below the 250 ppm sufficiency threshold in both strips, suggesting that while the cover crop improved early-season nitrogen availability, the full 60 lb N/ac target was likely not met, making direct clover biomass sampling in 2026 the key next step.
+**Take-home message:** Across all in-season nitrogen indicators (NBI, chlorophyll, biomass %N, and grain %N) corn plants in the clover cover crop strips consistently showed higher nitrogen status than control plots, and this translated into a meaningful yield advantage of +16 bu/ac (+11.8%) at harvest. That said, end-of-season cornstalk nitrate values fell below the 250 ppm deficiency threshold in both strips, suggesting that while the cover crop improved early-season nitrogen availability, the full 60 lb N/ac target was likely not met, making direct clover biomass sampling in 2026 the key next step.
 :::
 
 ---
@@ -384,12 +380,12 @@ This report summarizes the on-farm nitrogen experiment conducted in your Kolb2 f
 ```{r summary-table, echo=FALSE, message=FALSE, warning=FALSE}
 summary_df <- tibble(
   Metric = c(
-    "🌽 Corn Yield",
-    "🌿 NBI (Nitrogen Balance Index)",
+    "🌽 Corn Yield(bu/ac)",
+    "🌿 NBI",
     "🍃 Chlorophyll Index",
-    "🧪 Biomass %N — (MaizeBiomass)",
-    "🌾 Grain %N (MaizeGrain)",
-    "🌽 CSNT (Cornstalk Nitrate)"
+    "🧪 Biomass %N",
+    "🌾 Grain %N",
+    "🌽 CSNT"
   ),
   `Control` = c(
     paste0(m_ctrl_nbi),
@@ -445,7 +441,7 @@ The map below shows the **corn yield spatial distribution** across the Kolb2 fie
     onerror="this.style.display='none'"
   />
   <figcaption style="font-size: 0.82rem; color: #6b7280; margin-top: 8px;">
-    <strong>Figure 2.</strong> Corn yield map — spatial distribution by quantile.
+    <strong>Figure 2.</strong> Corn yield map.
   </figcaption>
 </figure>
 
@@ -458,7 +454,7 @@ The map below shows the **corn yield spatial distribution** across the Kolb2 fie
             padding: 10px 20px; border-radius: 8px; text-decoration: none;
             font-size: 0.95rem; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
             transition: opacity 0.2s;">
-    🗺️ Open Interactive NDVI Map
+    🗺️ Open Interactive Map
   </a>
 </div>
 ```
@@ -573,12 +569,12 @@ section_cards(m_cover_nbi, m_ctrl_nbi, delta_nbi, pct_nbi, p_nbi,
 p <- ggplot(df_avg, aes(x = nbi, fill = treatment, color = treatment)) +
   geom_density(alpha = 0.35, linewidth = 0.8) +
   scale_fill_manual(values  = pal,
-                    labels = c("control"="Control","treatment"="Cover (Clover)")) +
+                    labels = c("control"="Control","treatment"="Treatment")) +
   scale_color_manual(values = pal,
-                     labels = c("control"="Control","treatment"="Cover (Clover)")) +
+                     labels = c("control"="Control","treatment"="Treatment")) +
   labs(
-    title    = "Nitrogen Balance Index (NBI) — Plant Average",
-    subtitle = paste0("Cover − Control = ", delta_nbi, " (", pct_nbi, "%) · ", p_nbi),
+    title    = "Nitrogen Balance Index (NBI)",
+    subtitle = paste0("Treatment − Control = ", delta_nbi, " (", pct_nbi, "%) · ", p_nbi),
     x = "Nitrogen Balance Index (Dualex)", y = "Density",
     fill = NULL, color = NULL
   ) +
@@ -596,11 +592,11 @@ p <- ggplot(df_avg, aes(x=treatment, y=nbi, fill=treatment, color=treatment)) +
   geom_boxplot(alpha=0.35, outlier.shape=NA, linewidth=0.8, width=0.4) +
   geom_jitter(width=0.15, alpha=0.5, size=1.8) +
   scale_fill_manual(values  = pal,
-                    labels = c("control"="Control","treatment"="Cover (Clover)")) +
+                    labels = c("control"="control","treatment"="treatment")) +
   scale_color_manual(values = pal,
-                     labels = c("control"="Control","treatment"="Cover (Clover)")) +
-  scale_x_discrete(labels = c("control"="Control","treatment"="Cover (Clover)")) +
-  labs(title="Nitrogen Balance Index (NBI) by Treatment", subtitle=p_nbi,
+                     labels = c("control"="control","treatment"="treatment)")) +
+  scale_x_discrete(labels = c("control"="control","treatment"="treatment")) +
+  labs(title="Nitrogen Balance Index (NBI)", subtitle=p_nbi,
        x="Treatment", y="Nitrogen Balance Index (Dualex)") +
   theme_minimal(base_size=13) +
   theme(plot.title=element_text(face="bold"), legend.position="none",
@@ -636,7 +632,7 @@ p <- ggplot(df_avg, aes(x=chl, fill=treatment, color=treatment)) +
   scale_color_manual(values = pal,
                      labels = c("control"="Control","treatment"="Cover (Clover)")) +
   labs(
-    title    = "Chlorophyll (Chl) — Plant Average",
+    title    = "Chlorophyll (Chl)",
     subtitle = paste0("Cover − Control = ", delta_chl, " (", pct_chl, "%) · ", p_chl),
     x = "Chlorophyll Index (Dualex)", y = "Density",
     fill = NULL, color = NULL
@@ -655,11 +651,11 @@ p <- ggplot(df_avg, aes(x=treatment, y=chl, fill=treatment, color=treatment)) +
   geom_boxplot(alpha=0.35, outlier.shape=NA, linewidth=0.8, width=0.4) +
   geom_jitter(width=0.15, alpha=0.5, size=1.8) +
   scale_fill_manual(values  = pal,
-                    labels = c("control"="Control","treatment"="Cover (Clover)")) +
+                    labels = c("control"="control","treatment"="treatment")) +
   scale_color_manual(values = pal,
-                     labels = c("control"="Control","treatment"="Cover (Clover)")) +
-  scale_x_discrete(labels = c("control"="Control","treatment"="Cover (Clover)")) +
-  labs(title="Chlorophyll (Chl) by Treatment", subtitle=p_chl,
+                     labels = c("control"="control","treatment"="treatment")) +
+  scale_x_discrete(labels = c("control"="control","treatment"="treatment")) +
+  labs(title="Chlorophyll (Chl)", subtitle=p_chl,
        x="Treatment", y="Chlorophyll Index (Dualex)") +
   theme_minimal(base_size=13) +
   theme(plot.title=element_text(face="bold"), legend.position="none",
@@ -706,7 +702,7 @@ p_n_bio <- ggplot(mean_data_N_bio, aes(x = Treatment, y = mean_N, fill = Treatme
   scale_fill_manual(values = pal_cn) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
   labs(
-    title    = "Nitrogen in Corn Biomass (Mean %N ± SE)",
+    title    = "N in Corn Biomass (Mean %N ± SE)",
     subtitle = paste0("Cover = +", perc_N_bio, "% N  |  Cohen's d = ",
                       round(d_N_bio$Cohens_d, 2),
                       "  |  n = ", n_nocover_bio, " vs ", n_cover_bio),
@@ -730,7 +726,7 @@ p_raw_N_bio <- ggplot(bens_biomass, aes(x = Treatment, y = TotalN_pct,
                linewidth = 0.8, fatten = 2) +
   scale_color_manual(values = pal_cn) +
   scale_fill_manual(values  = pal_cn) +
-  labs(title = "Individual Sample Values — Biomass %N",
+  labs(title = "Individual Sample Values",
        subtitle = "Horizontal bar = group mean",
        x = "Treatment", y = "Total Nitrogen (%)") +
   theme_minimal(base_size = 13) +
@@ -844,7 +840,7 @@ p_n_gr <- ggplot(mean_data_N_gr, aes(x = Treatment, y = mean_N, fill = Treatment
   scale_fill_manual(values = pal_cn) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
   labs(
-    title    = "Nitrogen in Corn Grain (Mean %N ± SE)",
+    title    = "N in Corn Grain (Mean %N ± SE)",
     subtitle = paste0("Cover = ", sign_fmt(perc_N_gr), "% N  |  Cohen's d = ",
                       round(d_N_gr$Cohens_d, 2),
                       "  |  n = ", n_nocover_gr, " vs ", n_cover_gr,
@@ -868,7 +864,7 @@ p_box_N_gr <- ggplot(bens_grain, aes(x = Treatment, y = TotalN_pct,
   stat_summary(fun=mean, geom="crossbar", width=0.3, linewidth=0.7, fatten=2) +
   scale_fill_manual(values  = pal_cn) +
   scale_color_manual(values = pal_cn) +
-  labs(title = "Grain %N by Treatment",
+  labs(title = "Grain %N",
        subtitle = paste0(p_N_gr, "  |  n = ", n_nocover_gr, " Control · ",
                          n_cover_gr, " Treatment"),
        x = "Treatment", y = "Total Nitrogen (%)") +
@@ -889,7 +885,7 @@ p_raw_N_gr <- ggplot(bens_grain, aes(x = Treatment, y = TotalN_pct,
                linewidth = 0.8, fatten = 2) +
   scale_color_manual(values = pal_cn) +
   scale_fill_manual(values  = pal_cn) +
-  labs(title = "Individual Sample Values — Grain %N",
+  labs(title = "Individual Sample Values",
        subtitle = "Horizontal bar = group mean",
        x = "Treatment", y = "Total Nitrogen (%)") +
   theme_minimal(base_size = 13) +
@@ -972,25 +968,25 @@ ggplotly(p_raw_CN_gr) |> layout(showlegend = FALSE)
 ## 🌽 Cornstalk Nitrate Test (CSNT) {#csnt-details}
 
 ::: {.page-intro}
-The Cornstalk Nitrate Test (CSNT) measures nitrate concentration in the lower cornstalk at the end of the season. It is a post-harvest diagnostic tool: values **above 250 ppm** suggest the crop had sufficient nitrogen; values **below 250 ppm** suggest nitrogen was limiting. For Kolb2 field, **both the control and cover treatment fell below 250 ppm**, indicating that nitrogen was limiting in both strips. Notably, the cover treatment measured *lower* than the control (57 vs 74 ppm), though both are in the same deficient range. Because only **one sample per treatment** was collected, no statistical comparison is possible — this is a field-level observation.
+The Cornstalk Nitrate Test (CSNT) measures nitrate concentration in the lower cornstalk at the end of the season. It is a post-harvest diagnostic tool: values **below 250 ppm indicate insufficient nitrogen**, while the **optimal range is between 750 and 2000 ppm**. Because only **one sample per treatment** was collected, no statistical comparison is possible — this is a field-level observation.
 :::
 
 ```{r csnt-card, echo=FALSE}
 HTML(paste0('
 <div class="sc-row">
   <div class="sc" style="border-top: 4px solid #e879a0">
-    <div class="sc-label">Control — CSNT</div>
+    <div class="sc-label">Control</div>
     <div class="sc-main">
       <span class="sc-val">', csnt_ctrl_lab, '</span>
     </div>
-    <div class="sc-sub">⚠ Below 250 ppm threshold — N was limiting</div>
+    <div class="sc-sub">⚠ Below 250 ppm deficiency threshold</div>
   </div>
   <div class="sc" style="border-top: 4px solid #0d9488">
-    <div class="sc-label">Cover (Treatment) — CSNT</div>
+    <div class="sc-label">Treatment</div>
     <div class="sc-main">
       <span class="sc-val">', csnt_cover_lab, '</span>
     </div>
-    <div class="sc-sub">⚠ Below 250 ppm threshold — N was limiting &nbsp;|&nbsp; n = 1 per treatment</div>
+    <div class="sc-sub">⚠ Below 250 ppm deficiency  threshold</div>
   </div>
 </div>
 '))
@@ -999,9 +995,7 @@ HTML(paste0('
 ```{r csnt-plot, echo=FALSE, message=FALSE, warning=FALSE}
 p_csnt <- ggplot(bens_csnt, aes(x = Treatment, y = CSNT_ppm, fill = Treatment)) +
   geom_col(width = 0.5, color = "black", alpha = 0.9) +
-  geom_hline(yintercept = 250, linetype = "dashed", color = "gray40", linewidth = 0.8) +
-  annotate("text", x = 0.55, y = 275, label = "Sufficient N threshold: 250 ppm",
-           hjust = 0, size = 3.5, color = "gray40") +
+geom_hline(yintercept = 250, linetype = "dashed", color = "#e57373", linewidth = 0.8) +
   scale_fill_manual(values = c("Control" = "#e879a0", "Treatment" = "#0d9488")) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.3))) +
   labs(
@@ -1067,7 +1061,7 @@ Soil health was assessed using the **Cornell Soil Health Test**. The overall qua
 ```
 ---
 
-## 📝 Conclusion {#conclusion}
+## 📝 Conclusions {#conclusions}
 
 ```{r conclusion-callouts, echo=FALSE}
 HTML(paste0('
@@ -1097,54 +1091,45 @@ HTML(paste0('
 
 <div class="conclusion-grid">
 
-  <div class="conc-card teal">
-    <div class="conc-title">🌿 Leaf Nitrogen Status (NBI)</div>
-    Cover crop plots showed a <strong>', pct_nbi, '% difference in NBI</strong>
-    compared to control (', m_cover_nbi, ' vs ', m_ctrl_nbi, ', ', p_nbi, ').
-    Chlorophyll also differed by <strong>', pct_chl, '%</strong> (', p_chl, ').
-    These in-season readings capture the nitrogen status.
-  </div>
+<div class="conc-card teal">
+  <div class="conc-title">🌿 Leaf Nitrogen Status (NBI)</div>
+  Cover crop plots showed a <strong>16.3% higher NBI</strong> compared to Control
+  (48.4 vs 41.6). Chlorophyll was also higher by <strong>16.3%</strong>. Both in-season readings point in the same direction: corn plants
+  in cover crop strips had consistently better nitrogen status during the growing season.
+</div>
 
-  <div class="conc-card amber">
-    <div class="conc-title">🧪 Biomass Nitrogen (%N)</div>
-    Laboratory analysis of corn biomass showed cover plots had
-    <strong>', sign_fmt(perc_N_bio), '% difference in tissue nitrogen</strong>
-    (', mean_cover_N_bio, '% vs ', mean_nocover_N_bio, '%).
-    Cohen\'s d = ', round(d_N_bio$Cohens_d, 2), '. Small sample size
-    (n = ', n_nocover_bio, ' vs ', n_cover_bio, ') — descriptive only.
-  </div>
+<div class="conc-card amber">
+  <div class="conc-title">🧪 Biomass Nitrogen (%N)</div>
+  Laboratory analysis of corn biomass showed cover plots had
+  <strong>+18.2% more nitrogen</strong> in their tissue (2.828% vs 2.392%). Cohens d = -1.53, indicating a large biological effect. With n = 5 per group,
+  formal statistical testing is not appropriate, but the magnitude of the
+  difference is notable and consistent with the Dualex readings.
+</div>
 
-  <div class="conc-card">
-    <div class="conc-title">🌾 Grain Nitrogen (%N)</div>
-    At harvest, grain %N was <strong>', sign_fmt(perc_N_gr), '% different</strong>
-    in cover strips (', mean_cover_N_gr, '% vs ', mean_nocover_N_gr, '%,
-    ', p_N_gr, ', n = ', n_nocover_gr, ' vs ', n_cover_gr, '). Grain N
-    reflects the full-season nitrogen story, integrating both applied
-    fertilizer and any cover crop contribution.
-  </div>
+<div class="conc-card">
+  <div class="conc-title">🌾 Grain Nitrogen (%N)</div>
+  At harvest, grain %N was <strong>+16.3% higher</strong> in cover strips
+  (1.262% vs 1.085%). This is a statistically significant result, and reflects the full-season nitrogen story:cover crop plants not only showed better in-season status but also accumulated
+  more nitrogen in the grain itself.
+</div>
 
-  <div class="conc-card red">
-    <div class="conc-title">🌽 CSNT — N Limiting in Both Strips</div>
-    End-of-season CSNT values were below 250 ppm in both treatments
-    (Control: ', csnt_ctrl, ' ppm; Cover: ', csnt_cover, ' ppm).
-    This indicates the corn crop was nitrogen-limited regardless of
-    the cover crop treatment. The 60 lb/ac clover N target was not
-    demonstrably met this season — direct clover biomass sampling
-    is needed to quantify actual N supply in 2026.
-  </div>
+<div class="conc-card pink">
+  <div class="conc-title">🌽 CSNT — N Limiting in Both Strips</div>
+  End-of-season stalk nitrate was below the 250 ppm deficiency threshold in
+  both treatments (Control: <strong>74 ppm</strong>; Cover: <strong>57 ppm</strong>).
+  This indicates the corn crop was nitrogen-limited regardless of treatment.
+  The 60 lb/ac clover N target was not demonstrably met this season,
+  direct clover biomass sampling would help quantify actual N supply in 2026.
+</div>
 
-  <div class="conc-card teal">
-    <div class="conc-title">🌽 Corn Yield — Cover vs No Cover</div>
-    Yield monitor data showed cover crop strips averaged
-    <strong>', mean_cover_yield, ' bu/ac</strong> vs
-    <strong>', mean_nocover_yield, ' bu/ac</strong> in control strips
-    — a difference of <strong>+', delta_yield, ' bu/ac (+', pct_yield, '%)</strong>.
-    Given the spatial autocorrelation inherent in yield monitor data,
-    this is a descriptive field observation rather than a formal
-    statistical result, but the direction is consistent with the
-    in-season nitrogen indicators.
-  </div>
-
+<div class="conc-card teal">
+  <div class="conc-title">🌾 Corn Yield — Cover vs No Cover</div>
+  Yield monitor data showed cover crop strips averaged <strong>142.7 bu/ac</strong>
+  vs <strong>133 bu/ac</strong> in control strips, a difference of
+  <strong>+9.7 bu/ac (+7.3%)</strong>. Given the spatial autocorrelation inherent
+  in yield monitor data, this is a descriptive field observation rather than a
+  formal statistical result, but the direction is consistent with all in-season
+  nitrogen indicators.
 </div>
 '))
 ```

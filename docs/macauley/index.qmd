@@ -58,13 +58,13 @@ nrates <- data.frame(
   PlotName = trimws(nrates_raw$SampleID),
   Nrate    = as.numeric(nrates_raw$NRate),
   NGroup   = factor(trimws(nrates_raw$Treatment),
-                    levels = c("Zero", "Low", "Farmer", "High")),
+                    levels = c("Zero", "Low", "Standard", "High")),
   stringsAsFactors = FALSE
 )
 
 # ============================================================
 #  YIELD — LECTURA Y PARSE DESDE PlotName (mac_BLK{b}_{t})
-#  TrtNum: 1=Zero(0), 2=Low(30), 3=Farmer(90), 4=High(150)
+#  TrtNum: 1=Zero(0), 2=Low(30), 3=Standard(90), 4=High(150)
 # ============================================================
 yield_raw <- read_csv(file.path(data_dir, yield_file), show_col_types = FALSE)
 
@@ -76,9 +76,9 @@ mac_yield <- yield_raw |>
     NGroup = factor(case_when(
       TrtNum == 1 ~ "Zero",
       TrtNum == 2 ~ "Low",
-      TrtNum == 3 ~ "Farmer",
+      TrtNum == 3 ~ "Standard",
       TrtNum == 4 ~ "High"
-    ), levels = c("Zero", "Low", "Farmer", "High")),
+    ), levels = c("Zero", "Low", "Standard", "High")),
     Nrate  = case_when(
       TrtNum == 1 ~   0,
       TrtNum == 2 ~  30,
@@ -105,7 +105,7 @@ emm_yield  <- emmeans(aov_yield, ~ NGroup)
 cld_yield  <- cld(emm_yield, Letters = letters, adjust = "tukey") |>
   as_tibble() |>
   mutate(
-    NGroup = factor(NGroup, levels = c("Zero", "Low", "Farmer", "High")),
+    NGroup = factor(NGroup, levels = c("Zero", "Low", "Standard", "High")),
     letter = str_trim(.group)
   )
 
@@ -122,23 +122,24 @@ p_lm_yield_lab <- ifelse(p_lm_yield < 0.001, "p < 0.001",
 
 # ============================================================
 #  DUALEX — LECTURA Y LIMPIEZA
-#  Cols: date, field, treatment, group, meas, leaf, chl, flav, anth, nbi
+#  Cols: date, field, treatment, group, meas, leaf, block_id, chl, flav, anth, nbi
 # ============================================================
 df_raw <- read_csv(file.path(data_dir, dualex_file), show_col_types = FALSE)
 
 df_clean <- df_raw |>
   mutate(
     treatment = str_squish(treatment),
-    treatment = factor(treatment, levels = c("Zero", "Low", "Farmer", "High"))
+    treatment = factor(treatment, levels = c("Zero", "Low", "Standard", "High")),
+    block_id  = factor(str_extract(block_id, "BLK[0-9]+"))
   ) |>
-  filter(!is.na(chl)) |>
+  filter(!is.na(chl), is.na(nbi) | nbi < 150) |>
   arrange(group, meas) |>
   group_by(group) |>
   mutate(plant_id = ceiling(row_number() / 2)) |>
   ungroup()
 
 df_avg <- df_clean |>
-  group_by(date, field, treatment, group, plant_id) |>
+  group_by(date, field, treatment, group, block_id, plant_id) |>
   summarise(
     chl  = mean(chl,  na.rm = TRUE),
     flav = mean(flav, na.rm = TRUE),
@@ -150,24 +151,24 @@ df_avg <- df_clean |>
 # ============================================================
 #  DUALEX — ANOVA + TUKEY (NBI y CHL)
 # ============================================================
-aov_nbi <- aov(nbi ~ treatment + group, data = df_avg)
+aov_nbi <- aov(nbi ~ treatment + block_id, data = df_avg)
 emm_nbi <- emmeans(aov_nbi, ~ treatment)
 cld_nbi <- cld(emm_nbi, Letters = letters, adjust = "tukey") |>
   as_tibble() |>
   mutate(
-    treatment = factor(treatment, levels = c("Zero","Low","Farmer","High")),
+    treatment = factor(treatment, levels = c("Zero","Low","Standard","High")),
     letter    = str_trim(.group)
   )
 p_anova_nbi <- summary(aov_nbi)[[1]][["Pr(>F)"]][1]
 p_lab_nbi   <- ifelse(p_anova_nbi < 0.001, "p < 0.001",
                       paste0("p = ", signif(p_anova_nbi, 3)))
 
-aov_chl <- aov(chl ~ treatment + group, data = df_avg)
+aov_chl <- aov(chl ~ treatment + block_id, data = df_avg)
 emm_chl <- emmeans(aov_chl, ~ treatment)
 cld_chl <- cld(emm_chl, Letters = letters, adjust = "tukey") |>
   as_tibble() |>
   mutate(
-    treatment = factor(treatment, levels = c("Zero","Low","Farmer","High")),
+    treatment = factor(treatment, levels = c("Zero","Low","Standard","High")),
     letter    = str_trim(.group)
   )
 p_anova_chl <- summary(aov_chl)[[1]][["Pr(>F)"]][1]
@@ -188,7 +189,7 @@ mac_cn <- merge(mac_cn, nrates[, c("PlotName","Nrate")],
                 by.x = "SampleID", by.y = "PlotName", all.x = TRUE)
 mac_cn$CN_ratio <- mac_cn$TotalC_pct / mac_cn$TotalN_pct
 mac_cn$NGroup   <- factor(trimws(mac_cn$Treatment),
-                           levels = c("Zero","Low","Farmer","High"))
+                           levels = c("Zero","Low","Standard","High"))
 
 mac_cn$Block <- factor(
   stringr::str_extract(mac_cn$SampleID, "BLK[0-9]+"))
@@ -217,7 +218,7 @@ emm_cn  <- emmeans(aov_cn, ~ NGroup)
 cld_cn  <- cld(emm_cn, Letters = letters, adjust = "tukey") |>
   as_tibble() |>
   mutate(
-    NGroup = factor(NGroup, levels = c("Zero","Low","Farmer","High")),
+    NGroup = factor(NGroup, levels = c("Zero","Low","Standard","High")),
     letter = str_trim(.group)
   )
 p_anova_cn <- summary(aov_cn)[[1]][["Pr(>F)"]][1]
@@ -244,7 +245,7 @@ mac_csnt <- merge(mac_csnt, nrates[, c("PlotName","Nrate")],
                   by.x = "SampleID", by.y = "PlotName", all.x = TRUE)
 
 mac_csnt$NGroup <- factor(trimws(mac_csnt$Treatment),
-                           levels = c("Zero","Low","Farmer","High"))
+                           levels = c("Zero","Low","Standard","High"))
 
 mac_csnt <- mac_csnt[!is.na(mac_csnt$NGroup) & !is.na(mac_csnt$CSNT_ppm), ]
 
@@ -280,7 +281,7 @@ emm_csnt <- emmeans(aov_csnt, ~ NGroup)
 cld_csnt <- cld(emm_csnt, Letters = letters, adjust = "tukey") |>
   as_tibble() |>
   mutate(
-    NGroup = factor(NGroup, levels = c("Zero","Low","Farmer","High")),
+    NGroup = factor(NGroup, levels = c("Zero","Low","Standard","High")),
     letter = str_trim(.group)
   )
 
@@ -297,7 +298,7 @@ p_lab_csnt <- ifelse(
 # ============================================================
 pal4 <- c("Zero"   = "#d1e5f0",
           "Low"    = "#74add1",
-          "Farmer" = "#4dac26",
+          "Standard" = "#4dac26",
           "High"   = "#1a6136")
 
 # ============================================================
@@ -361,7 +362,9 @@ anova_cards <- function(p_val, val_zero, val_high, units = "", note = "") {
       </span>
     </div>
     <div class="lab-topbar__right">
-      <a class="btn btn-download" href="index.pdf">⬇ Download PDF</a>
+<a class="btn btn-download" href="index.pdf" title="Download PDF version" target="_blank" rel="noopener noreferrer">
+  ⬇ Download PDF
+</a>
     </div>
   </div>
 </div>
@@ -369,18 +372,18 @@ anova_cards <- function(p_val, val_zero, val_high, units = "", note = "") {
 
 ::: {.page-intro}
 **Welcome to your 2025 farm report.**
-This report summarizes the on-farm nitrogen rate trial conducted in the Ntrials field. Four nitrogen rates were tested: 0 (Zero), 30 (Low), 90 (Farmer rate), and 150 (High) lb N/ac, in a randomized complete block design with 4 blocks. Statistical comparisons use one-way ANOVA with Tukey post-hoc tests. Letters in the figures indicate treatment groups that are significantly different from each other (p < 0.05).
+This report summarizes the on-farm nitrogen rate trial conducted in the Ntrials field. Four nitrogen rates were tested: 0 (Zero), 30 (Low), 90 (Standard rate), and 150 (High) lb N/ac, in a randomized complete block design with 4 blocks. Statistical comparisons use a randomized complete block design (RCBD) ANOVA with Tukey post-hoc tests. Letters in the figures indicate treatment groups that are significantly different from each other (p < 0.05).
 :::
 
 ```{=html}
 <figure style="margin: 20px 0; text-align: center;">
   <img src="images/macauley_field.png"
        alt="Macauley field — N rate trial design"
-       style="max-width:100%; border-radius:8px; border:1px solid #e5e7eb;
+       style="max-width:80%; border-radius:8px; border:1px solid #e5e7eb;
               box-shadow:0 2px 8px rgba(0,0,0,0.07);"
        onerror="this.style.display='none'" />
   <figcaption style="font-size:0.82rem; color:#6b7280; margin-top:8px;">
-    <strong>Figure 1.</strong> N rate treatment layout.
+    <strong>Figure 1.</strong> Treatment layout.
   </figcaption>
 </figure>
 <div style="margin: 16px 0 24px; text-align: center;">
@@ -398,7 +401,7 @@ This report summarizes the on-farm nitrogen rate trial conducted in the Ntrials 
 ```
 
 ::: {.page-intro}
-**Take-home message:** Yield data from the N-rate strips is now included alongside the nitrogen indicators. Together, these results address the core research question: whether applying cover crops allows a reduction in nitrogen fertilizer without sacrificing grain yield. Results from the ANOVA and dose-response regression are summarized below.
+**Take-home message:** Across all indicators, nitrogen rate had no detectable effect on plant status or yield in this field. Stalk nitrate was exceptionally high even in the Zero N strips, pointing to a soil with a large natural nitrogen reserve. Under these conditions, current application rates may be higher than necessary. Building soil biological activity through continued cover cropping remains a worthwhile long-term investment, even if the short-term nitrogen benefit is not yet visible.
 :::
 
 ---
@@ -435,12 +438,12 @@ summary_df <- tibble(
     fmt1(round(filter(cn_summary,  NGroup    == "Low")$mean_N, 1)),
     fmt1(round(filter(csnt_summary,NGroup    == "Low")$mean_csnt, 0))
   ),
-  `Farmer (90 lb N)` = c(
-    fmt1(round(filter(yield_summary, NGroup == "Farmer")$mean_yield, 1)),
-    fmt1(round(filter(cld_nbi,     treatment == "Farmer")$emmean, 1)),
-    fmt1(round(filter(cld_chl,     treatment == "Farmer")$emmean, 1)),
-    fmt1(round(filter(cn_summary,  NGroup    == "Farmer")$mean_N, 1)),
-    fmt1(round(filter(csnt_summary,NGroup    == "Farmer")$mean_csnt, 0))
+  `Standard (90 lb N)` = c(
+    fmt1(round(filter(yield_summary, NGroup == "Standard")$mean_yield, 1)),
+    fmt1(round(filter(cld_nbi,     treatment == "Standard")$emmean, 1)),
+    fmt1(round(filter(cld_chl,     treatment == "Standard")$emmean, 1)),
+    fmt1(round(filter(cn_summary,  NGroup    == "Standard")$mean_N, 1)),
+    fmt1(round(filter(csnt_summary,NGroup    == "Standard")$mean_csnt, 0))
   ),
   `High (150 lb N)` = c(
     fmt1(round(filter(yield_summary, NGroup == "High")$mean_yield, 1)),
@@ -455,14 +458,14 @@ knitr::kable(summary_df, align = c("l","c","c","c","c","c"))
 ```
 
 ::: {style="font-size:0.82rem; color:#9ca3af; margin-top:-8px;"}
-Means shown. Letters from Tukey HSD test shown in individual section figures. ANOVA: one-way, 4 blocks × 4 treatments (RCBD).
+Means shown. Letters from Tukey HSD test shown in individual section figures. ANOVA: RCBD, 4 blocks × 4 treatments.
 :::
 
 
 ## 🌾 Corn Yield {#yield}
 
 ::: {.page-intro}
-Corn yield was measured across all strips and joined to the N-rate treatment assignments. Results are compared across the four N-rate levels (Zero, Low, Farmer, High) using one-way ANOVA in a randomized complete block design. **Letters above bars indicate groups that differ significantly (Tukey HSD, p < 0.05).** A linear regression (yield ~ N rate) tests for a dose-response trend.
+We measured corn yield in each strip and matched it to the nitrogen (N) rate used. Then we **compared the average yields** across the four N rates (0, 30, 90, and 150 lb N) to see if any rate clearly outperformed the others. We also **grouped the results** to show which N rates are **truly different from each other**, versus differences that are **just normal field variation** (block design-RCBD). Strips sharing the same letter are statistically the same (Tukey HSD). Finally, we tested whether yield increased steadily with more N applied (linear regression).
 :::
 
 ```{r yield-cards, echo=FALSE}
@@ -490,7 +493,7 @@ p <- ggplot(cld_yield_plot, aes(x = NGroup, y = mean_yield, fill = NGroup)) +
   scale_fill_manual(values = pal4) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
   labs(
-    title    = "Corn Yield — Mean ± SE by N Rate",
+    title    = "Corn Yield - Mean ± SE",
     subtitle = paste0("ANOVA ", p_lab_yield, " · Letters = Tukey HSD groups"),
     x = "N Rate Treatment", y = "Yield (bu/ac)",
     caption = "Error bars = ±SE. Same letter = no significant difference."
@@ -514,7 +517,7 @@ p <- ggplot(mac_yield, aes(x = NGroup, y = Yield_buAc,
                linewidth = 0.8, fatten = 2, color = "black") +
   scale_color_manual(values = pal4) +
   scale_fill_manual(values  = pal4) +
-  labs(title = "Individual Strip Yields by N Rate",
+  labs(title = "Individual Strip Yields",
        subtitle = "Horizontal bar = group mean",
        x = "N Rate Treatment", y = "Yield (bu/ac)") +
   theme_minimal(base_size = 13) +
@@ -531,7 +534,7 @@ ggplotly(p) |> config(displaylogo = FALSE) |> layout(showlegend = FALSE)
 ## 🌿 Nitrogen Balance Index (NBI) {#nbi-details}
 
 ::: {.page-intro}
-The **Nitrogen Balance Index (NBI)** is measured with the Dualex sensor and reflects the ratio of chlorophyll to flavonoids in the leaf. A higher NBI indicates better nitrogen status. Two leaves per plant were measured and averaged. Results are compared across the four N rate levels using one-way ANOVA. **Letters above bars indicate groups that differ significantly (Tukey HSD, p < 0.05).**
+The **Nitrogen Balance Index (NBI)** is measured with the Dualex sensor and gives an idea of how much nitrogen the plant has. It compares leaf greenness to stress signals in the leaf, so **higher numbers mean the plant has enough nitrogen**. We took two leaf readings per plant and averaged them. Then we compared the average NBI across the four N rates (0, 30, 90, and 150 lb N) **to see if adding more nitrogen improved plant status**. We also grouped the results to show which rates are truly different, versus differences that are just normal field variation (block design-RCBD). Strips sharing the same letter are statistically the same(Tukey HSD).
 :::
 
 ```{r nbi-cards, echo=FALSE}
@@ -539,7 +542,7 @@ anova_cards(p_lab_nbi,
             val_zero = filter(cld_nbi, treatment == "Zero")$emmean,
             val_high = filter(cld_nbi, treatment == "High")$emmean,
             units = "",
-            note = "One-way ANOVA across Zero, Low, Farmer, High")
+            note = "RCBD ANOVA across Zero, Low, Standard, High")
 ```
 
 ::: {.panel-tabset}
@@ -623,7 +626,7 @@ ggplotly(p) |> config(displaylogo = FALSE) |> layout(showlegend = FALSE)
 ## 🍃 Chlorophyll (Chl) {#chl-details}
 
 ::: {.page-intro}
-The **Chlorophyll Index (Chl)** estimates chlorophyll content in the leaf — a reliable proxy for nitrogen sufficiency. As with NBI, two leaves per plant were averaged. Compared across four N rate levels using one-way ANOVA + Tukey HSD.
+The **Chlorophyll Index (Chl)** estimates chlorophyll content in the leaf, a reliable proxy for nitrogen sufficiency. Greener leaves generally mean more nitrogen in the plant. As with NBI, two leaves per plant were averaged. We also grouped the results to show which rates are truly different, versus differences that are just normal field variation (block design-RCBD). Strips sharing the same letter are statistically the same(Tukey HSD).
 :::
 
 ```{r chl-cards, echo=FALSE}
@@ -631,7 +634,7 @@ anova_cards(p_lab_chl,
             val_zero = filter(cld_chl, treatment == "Zero")$emmean,
             val_high = filter(cld_chl, treatment == "High")$emmean,
             units = "",
-            note = "One-way ANOVA across Zero, Low, Farmer, High")
+            note = "RCBD ANOVA across Zero, Low, Standard, High")
 ```
 
 ::: {.panel-tabset}
@@ -715,7 +718,7 @@ ggplotly(p) |> config(displaylogo = FALSE) |> layout(showlegend = FALSE)
 ## 🧪 C:N in Corn Biomass {#cn-details}
 
 ::: {.page-intro}
-Corn biomass was collected at the V6 stage and analyzed for total nitrogen content. Each plot had two sub-samples (A and B), giving **`r nrow(mac_cn)` observations** across the 16 plots (4 blocks × 4 N rates). One-way ANOVA tests whether %N in biomass differs by N rate, and a **linear regression** (% N ~ N rate lb/ac) tests for a dose-response trend. R² and p-value from the regression are shown in the scatter plot.
+Corn biomass was collected and analyzed for total nitrogen content.  Each of the 16 plots (4 blocks × 4 N rates) had two sub-samples averaged together. We used a block design (RCBD) to test whether tissue nitrogen differed by N rate, and a linear regression to check if nitrogen in the tissue increased steadily with more N applied.
 :::
 
 ```{r cn-cards, echo=FALSE}
@@ -783,7 +786,7 @@ ggplotly(p) |> config(displaylogo = FALSE) |> layout(showlegend = FALSE)
 ## 🌽 Cornstalk Nitrate Test (CSNT) {#csnt-details}
 
 ::: {.page-intro}
-The **Cornstalk Nitrate Test (CSNT)** measures residual nitrate in the lower stalk at season end. Values **above 250 ppm** indicate adequate nitrogen supply; values **below 250 ppm** suggest N was limiting. Each plot had two samples (E and W positions), giving **`r nrow(mac_csnt)` observations** across the 16 plots. The dashed line marks the 250 ppm sufficiency threshold.
+The Cornstalk Nitrate Test (CSNT) measures nitrate concentration in the lower cornstalk at the end of the season. It is a post-harvest diagnostic tool: values **below 250 ppm indicate insufficient nitrogen**, while the **optimal range is between 750 and 2000 ppm**. Each plot had two samples (E and W positions), giving **`r nrow(mac_csnt)` observations** across the 16 plots. The red dashed line marks the 250 ppm deficiency threshold and the green line the 750 ppm optimal threshold.
 :::
 
 ```{r csnt-cards, echo=FALSE}
@@ -791,7 +794,7 @@ anova_cards(p_lab_csnt,
             val_zero = filter(csnt_summary, NGroup == "Zero")$mean_csnt,
             val_high = filter(csnt_summary, NGroup == "High")$mean_csnt,
             units = "ppm",
-            note = "One-way ANOVA — E and W samples pooled per plot")
+            note = "RCBD ANOVA — E and W samples averaged per plot")
 ```
 
 ::: {.panel-tabset}
@@ -808,9 +811,8 @@ p <- ggplot(cld_csnt_plot, aes(x = NGroup, y = mean_csnt, fill = NGroup)) +
                 width = 0.15, linewidth = 0.9) +
   geom_text(aes(label = letter, y = mean_csnt + se_csnt + 500),
             size = 5, fontface = "bold") +
-  geom_hline(yintercept = 250, linetype = "dashed", color = "gray40", linewidth = 0.8) +
-  annotate("text", x = 0.55, y = 350, label = "Sufficient N: 250 ppm",
-           hjust = 0, size = 3.5, color = "gray40") +
+      geom_hline(yintercept = 250, linetype = "dashed", color = "#e57373", linewidth = 0.8) +
+  geom_hline(yintercept = 750, linetype = "dashed", color = "#66bb6a", linewidth = 0.8) +
   scale_fill_manual(values = pal4) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.25))) +
   labs(
@@ -896,24 +898,24 @@ Soil health was assessed using the **Cornell Soil Health Test** (sampled 04/30/2
 ```
 ---
 
-## 📝 Conclusion {#conclusion}
+## 📝 Conclusions {#conclusions}
 
 ```{r conclusion, echo=FALSE}
 # Pull key values for narrative
 nbi_zero   <- round(filter(cld_nbi, treatment == "Zero")$emmean, 1)
-nbi_farmer <- round(filter(cld_nbi, treatment == "Farmer")$emmean, 1)
+nbi_farmer <- round(filter(cld_nbi, treatment == "Standard")$emmean, 1)
 nbi_high   <- round(filter(cld_nbi, treatment == "High")$emmean, 1)
 
 chl_zero   <- round(filter(cld_chl, treatment == "Zero")$emmean, 1)
-chl_farmer <- round(filter(cld_chl, treatment == "Farmer")$emmean, 1)
+chl_farmer <- round(filter(cld_chl, treatment == "Standard")$emmean, 1)
 chl_high   <- round(filter(cld_chl, treatment == "High")$emmean, 1)
 
 cn_zero    <- round(filter(cn_summary, NGroup == "Zero")$mean_N, 3)
-cn_farmer  <- round(filter(cn_summary, NGroup == "Farmer")$mean_N, 3)
+cn_farmer  <- round(filter(cn_summary, NGroup == "Standard")$mean_N, 3)
 cn_high    <- round(filter(cn_summary, NGroup == "High")$mean_N, 3)
 
 csnt_zero   <- round(filter(csnt_summary, NGroup == "Zero")$mean_csnt, 0)
-csnt_farmer <- round(filter(csnt_summary, NGroup == "Farmer")$mean_csnt, 0)
+csnt_farmer <- round(filter(csnt_summary, NGroup == "Standard")$mean_csnt, 0)
 csnt_high   <- round(filter(csnt_summary, NGroup == "High")$mean_csnt, 0)
 
 HTML(paste0('
@@ -931,56 +933,48 @@ HTML(paste0('
 
 <div class="conclusion-grid">
 
-  <div class="conc-card teal">
-    <div class="conc-title">🌾 Corn Yield (', p_lab_yield, ')</div>
-    Mean yield ranged from <strong>', round(filter(yield_summary, NGroup=="Zero")$mean_yield,1), ' bu/ac</strong> (Zero)
-    to <strong>', round(filter(yield_summary, NGroup=="High")$mean_yield,1), ' bu/ac</strong> (High),
-    with the Farmer rate at <strong>', round(filter(yield_summary, NGroup=="Farmer")$mean_yield,1), ' bu/ac</strong>.
-    The linear regression showed R² = ', r2_yield, ' (', p_lm_yield_lab, ').
-    ', ifelse(p_anova_yield < 0.05,
-      "Significant yield differences among N rates were detected — higher N rates produced meaningfully more grain.",
-      "No significant yield differences were detected among N rates, suggesting the cover crop may be supplying sufficient N even at lower application rates."), '
-  </div>
-
-  <div class="conc-card teal">
-    <div class="conc-title">🌿 NBI (', p_lab_nbi, ')</div>
-    NBI ranged from <strong>', nbi_zero, '</strong> (Zero) to <strong>', nbi_high, '</strong> (High),
-    with the Farmer rate at <strong>', nbi_farmer, '</strong>.
-    ', ifelse(p_anova_nbi < 0.05,
-      "The ANOVA detected a significant effect of N rate — higher N doses led to measurably better leaf nitrogen status.",
-      "The ANOVA did not detect a significant difference among N rates for NBI."), '
-  </div>
-
-  <div class="conc-card">
-    <div class="conc-title">🍃 Chlorophyll (', p_lab_chl, ')</div>
-    Chlorophyll values were ', chl_zero, ' (Zero), ', chl_farmer, ' (Farmer), and ', chl_high, ' (High).
-    ', ifelse(p_anova_chl < 0.05,
-      "Significant differences were detected — consistent with NBI results showing N rate effects on leaf greenness.",
-      "No significant differences were detected among N rates for chlorophyll."), '
-  </div>
-
-  <div class="conc-card amber">
-    <div class="conc-title">🧪 Biomass %N (', p_lab_cn, ')</div>
-    
-The linear regression between %N and N rate showed R² = ', r2_cn, ' (', p_lm_lab, '),
-  ', ifelse(as.numeric(gsub("p = |p < ", "", p_lm_lab)) < 0.05 || grepl("<", p_lm_lab),
-    "indicating a weak but significant relationship between applied N rate and tissue N concentration.",
-    "suggesting no clear dose–response relationship between N rate and tissue N concentration."), '
-
-  Spatial variability across field strips (block effect) contributed significantly to differences in biomass %N.
+<div class="conc-card teal">
+  <div class="conc-title">🌾 Corn Yield</div>
+  Yield was similar across all N rates, ranging from <strong>153.8 to 167.7 bu/ac</strong>.
+  No clear pattern was detected as N rate increased, suggesting the soil supplied
+  sufficient nitrogen even without fertilizer application.
 </div>
 
+<div class="conc-card teal">
+  <div class="conc-title">🌿 NBI</div>
+  NBI values were similar across all treatments (86–92), all within a healthy range.
+  Adding more nitrogen did not improve leaf nitrogen status, indicating plants were
+  well-supplied regardless of N rate.
+</div>
 
-  <div class="conc-card pink">
-    <div class="conc-title">🌽 CSNT (', p_lab_csnt, ')</div>
-    End-of-season stalk nitrate averaged ', csnt_zero, ' ppm (Zero), ', csnt_farmer, ' ppm (Farmer),
-    and ', csnt_high, ' ppm (High). The 250 ppm sufficiency threshold was
-    ', ifelse(csnt_zero >= 250, "met even at Zero N", "not met at Zero N"), '.
-    ', ifelse(p_anova_csnt < 0.05,
-      "Significant differences among N rates were detected in CSNT.",
-      "No significant differences among N rates were detected in CSNT."), '
-  </div>
+<div class="conc-card">
+  <div class="conc-title">🍃 Chlorophyll</div>
+  Chlorophyll was nearly identical across all N rates (46–48), confirming that leaf
+  greenness was not affected by how much nitrogen was applied. Plants showed no signs
+  of nitrogen stress even at zero applied N.
+</div>
 
+<div class="conc-card amber">
+  <div class="conc-title">🧪 Biomass %N</div>
+  Tissue nitrogen was consistent across treatments (4.1–4.2%), with no meaningful
+  difference between the zero and high N rate strips. N rate had no detectable
+  effect on how much nitrogen the plant accumulated at this growth stage.
+</div>
+
+<div class="conc-card pink">
+  <div class="conc-title">🌽 CSNT</div>
+  End-of-season stalk nitrate was very high in all treatments (4,588–4,818 ppm),
+  well above the 750 ppm optimal threshold. The crop had abundant nitrogen at
+  season end regardless of how much was applied.
+</div>
+
+<div class="conc-card">
+  <div class="conc-title">🌱 Soil Health</div>
+  The overall soil health score was <strong>57/100 (Medium)</strong>, with low
+  biological activity across the board. Despite this, the field appears to have
+  a large reserve of available nitrogen. Continued cover cropping could improve
+  organic matter and microbial activity over time, even if a single-season
+  nitrogen response is not yet visible.
 </div>
 '))
 ```
