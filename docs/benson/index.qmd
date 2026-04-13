@@ -428,7 +428,7 @@ knitr::kable(summary_df, align = c("l","c","c","c","c"))
 
 
 ::: {.page-intro}
-The map below shows the **corn yield spatial distribution** across the Kolb2 field, displayed in quantiles. The line separates the clover cover crop (treatment) and control sub-fields.
+The map below shows the **corn yield spatial distribution** across the Kolb2 field, displayed in bushels per acre. The line separates the clover cover crop (treatment) and control sub-fields.
 :::
 
 ```{=html}
