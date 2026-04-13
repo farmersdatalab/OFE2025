@@ -593,10 +593,8 @@ HTML(paste0('
 <div class="conc-card">
   <div class="conc-title">🌱 Soil Health</div>
   The overall score was <strong>63/100 (High)</strong>, with excellent chemical
-  indicators (pH, P, K all near 100). The main gap is biological activity —
-  Organic Matter (21), Soil Respiration (28), and Aggregate Stability (29) are
-  all Low. As cover cropping continues, these scores should improve, potentially
-  increasing nitrogen mineralization and the effective N credit from the cover crop. One flag to follow up on: **zinc came back as deficient**.
+  indicators (pH, P, K all near 100). The main gaps are: Organic Matter (21) Soil Respiration (28), Active carbon (52), and Aggregate Stability (29). As cover cropping continues, these scores should improve, potentially
+  increasing nitrogen mineralization and the effective N credit from the cover crop. One flag to follow up on: zinc came back as deficient.
 </div>
 '))
 ```
