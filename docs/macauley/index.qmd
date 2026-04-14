@@ -401,7 +401,8 @@ This report summarizes the on-farm nitrogen rate trial conducted in the Ntrials 
 ```
 
 ::: {.page-intro}
-**Take-home message:** Across all indicators, nitrogen rate had no detectable effect on plant status or yield in this field. Stalk nitrate was exceptionally high even in the Zero N strips, pointing to a soil with a large natural nitrogen reserve. Under these conditions, current application rates may be higher than necessary. Building soil biological activity through continued cover cropping remains a worthwhile long-term investment, even if the short-term nitrogen benefit is not yet visible.
+**Take-home message:** Take-home message: No matter how much nitrogen we applied, from zero all 
+the way up to 150 lb/ac, yield, plant color, and end-of-season stalk nitrate were virtually identical across all strips. Your soil appears to be supplying nitrogen on its own, well beyond what the crop needed this season. Based on this data, you may be applying more nitrogen than necessary. Continuing with cover crops remains a smart long-term investment to keep building soil health, even if the short-term nitrogen response isn't showing up yet.
 :::
 
 ---
@@ -718,7 +719,7 @@ ggplotly(p) |> config(displaylogo = FALSE) |> layout(showlegend = FALSE)
 ## 🧪 C:N in Corn Biomass {#cn-details}
 
 ::: {.page-intro}
-Corn biomass was collected and analyzed for total nitrogen content.  Each of the 16 plots (4 blocks × 4 N rates) had two sub-samples averaged together. We used a block design (RCBD) to test whether tissue nitrogen differed by N rate, and a linear regression to check if nitrogen in the tissue increased steadily with more N applied.
+We collected corn plant samples from each to measure how much nitrogen actually ended up inside the plant tissue. This is one of the most direct measurements we have, it tells you what the crop actually absorbed, not just what was available in the soil. Each of the 16 plots had two sub-samples averaged together, and we used the same block design as the other analyses to keep the comparison fair. We also ran a linear regression to see if tissue nitrogen climbed steadily with more N applied.
 :::
 
 ```{r cn-cards, echo=FALSE}
@@ -855,7 +856,7 @@ ggplotly(p) |> config(displaylogo = FALSE) |> layout(showlegend = FALSE)
 ## 🌱 Soil Health Assessment {#soilhealth}
 
 ::: {.page-intro}
-Soil health was assessed using the **Cornell Soil Health Test** (sampled 04/30/2025, Ntrials field). The overall quality score was **57/100 (Medium)**. Key constraints are **Soil Respiration** (score 17 — Very Low, constraining), **Organic Matter** (score 29 — Low), **Active Carbon** (score 31 — Low), and **ACE Soil Protein Index** (score 24 — Low). These biological indicators suggest that microbial activity and organic matter are limiting soil function, which is directly relevant to the question of whether the soil can supply nitrogen from internal sources.
+Soil health was assessed using the **Cornell Soil Health Test** (sampled 04/30/2025, Ntrials field). The overall quality score was **57/100 (Medium)**. The biological indicators are the main area of concern: soil respiration, organic matter, active carbon, and soil protein index all came back Low. These are the indicators that reflect how active and alive your soil biology is, and right now, that biological engine is running at a lower capacity than ideal. The interesting thing is that despite these low biological scores, your field clearly had plenty of nitrogen available this season. That nitrogen is likely coming from a large existing reserve in the soil, not from active biological cycling. Cover cropping is a direct investment in improving exactly these biological scores over time, feeding the microbes, adding carbon, and building a soil that can supply nitrogen more consistently from its own internal processes.
 :::
 
 ```{=html}
@@ -883,7 +884,9 @@ Soil health was assessed using the **Cornell Soil Health Test** (sampled 04/30/2
 ## 🌧️Weather & Drought Conditions {#weatherDrought}
 
 ::: {.page-intro}
-**Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index from June through November 2025.  
+**Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index from June through November 2025. Your field tracked closely with the all-site average through the summer months, 
+with consistent rainfall from June through August and a cumulative total near the network average heading into September. A strong rain event in late June provided a good early push for the crop. The second half of the season brought a notable dry stretch, drought conditions escalated from Low in late September to Mild for most of October, lasting roughly four to five weeks before easing 
+in November. This late-season dry period coincided with the end of grain fill and is worth keeping in mind when interpreting end-of-season stalk nitrate results, as dry conditions can concentrate nitrate in the stalk even when overall nitrogen supply is adequate.
 :::
 ```{=html}
 <figure style="margin: 0 0 24px; text-align: center;">
@@ -935,9 +938,11 @@ HTML(paste0('
 
 <div class="conc-card teal">
   <div class="conc-title">🌾 Corn Yield</div>
-  Yield was similar across all N rates, ranging from <strong>153.8 to 167.7 bu/ac</strong>.
-  No clear pattern was detected as N rate increased, suggesting the soil supplied
-  sufficient nitrogen even without fertilizer application.
+  Yield was similar across all four N rates, ranging from <strong>153.8 to 
+167.7 bu/ac</strong>. No clear pattern emerged as nitrogen increased — the 
+strips that got zero fertilizer performed just as well as the ones that got 
+150 lb N/ac. The soil appears to have supplied all the nitrogen the crop 
+needed on its own this season.
 </div>
 
 <div class="conc-card teal">

@@ -254,7 +254,7 @@ info_cards <- function(note_left, val_left, note_right, val_right,
 
 ::: {.page-intro}
 **Welcome to your 2025 farm report.**
-This report summarizes the on-farm nitrogen rate experiment conducted in field 302-3. **The entire field has cover crop**. The field contains 10 N rate strips (R0–R9): strips R2, R3, R4, R5, R7, and R8 received fixed N rates (25–62 lb N/ac), while strips R0, R1, R6, and R9 received **variable rates**. The "Control" label in the data refers to the area of the field **with variable N rate (avg 30 lb/ac)**. Variable-rate strips are presented as a single "Variable" group, allowing a direct comparison of fixed vs. variable-rate N management.
+This report summarizes the on-farm nitrogen rate experiment conducted in field 302-3. This season, your entire field had cover crop, so the question we're asking is a step further than most: given that the cover crop is already in place, how much additional nitrogen fertilizer does the corn actually need? We tested five N rate scenarios across 10 strips (R0–R9): fixed rates of 25, 37, 50, and 62 lb N/ac, plus variable-rate strips (R0, R1, R6, R9) that averaged around 30 lb N/ac. Variable-rate strips are presented as a single "Variable" group, allowing a direct comparison of fixed vs. variable-rate N management. The goal is to find the rate where you get the most grain for your dollar, and see how far the cover crop can take you before yield starts to slip. 
 :::
 
 ```{=html}
@@ -271,7 +271,7 @@ This report summarizes the on-farm nitrogen rate experiment conducted in field 3
 ```
 
 ::: {.page-intro}
-**Take-home message:** Across all nitrogen indicators — Biomass %N, CSNT, and corn yield — the data suggests a consistent response to N rate: higher applied nitrogen was associated with greater tissue N and end-of-season stalk nitrate. However, yield did not follow the same pattern. The 50 lb N/ac strip outperformed the higher 62 lb N/ac rate, suggesting that additional nitrogen beyond a certain point does not translate into more grain. Variable-rate strips showed the lowest yield and stalk nitrate values just above the sufficiency threshold, indicating N may have been the limiting factor in those areas. With soil chemistry in excellent condition but biological activity still developing, continued cover cropping could gradually reduce dependence on applied N.
+**Take-home message:** Take-home message: More nitrogen generally meant more nitrogen in the plant and higher stalk nitrate at season end, but it didn't always mean more yield. The 50 lb N/ac strip actually outperformed the 62 lb N/ac strip, suggesting there's a point where adding more fertilizer stops paying off. The variable-rate strips, which received the least nitrogen, had the lowest yield and stalk nitrate values just barely above the sufficiency threshold, indicating nitrogen was likely a limiting factor there. Your soil chemistry is excellent, but biological activity is still developing. As the cover crop system matures, the soil should be able to supply more nitrogen internally, and the optimal fertilizer rate may shift lower over time.
 :::
 
 ---
@@ -331,7 +331,7 @@ The map below shows the **corn yield spatial distribution** across field 302-3, 
 ```
 
 ::: {.page-intro}
-The charts below summarize **yield monitor data** from field 302-3 across the 10 N rate strips (R0–R9). Outliers beyond ±3 SD within each strip were removed before analysis (`r n_removed` points excluded out of `r nrow(yield_raw)` total).
+The charts below summarize **yield monitor data** from field 302-3 across the five N rate groups. A small number of extreme outlier points (beyond ±3 standard deviations within each strip) were removed before analysis to keep the averages clean and representative.Keep in mind that with only one or two strips per fixed rate, we can't run a formal statistical test, but the yield monitor gives us enough data points within each strip to see meaningful patterns.
 :::
 
 ::: {.panel-tabset}
@@ -428,7 +428,7 @@ ggplotly(p) |> config(displaylogo = FALSE) |> layout(showlegend = FALSE)
 ## 🌱 Cover Crop Biomass C:N {#covercrop-cn}
 
 ::: {.page-intro}
-Cover crop biomass was sampled across field 302-3 in spring **before treatment strips were defined** — all samples represent the field as a whole. The %N and C:N ratio of the residue indicate how quickly nutrients will be released to the following corn crop. A C:N ratio below ~25 suggests relatively fast N release during decomposition.
+Cover crop biomass was sampled across field 302-3 in spring **before treatment strips were defined**, all samples represent the field as a whole. The %N of the cover crop residue tells us how nitrogen-rich it is, and the C:N ratio tells us how quickly that nitrogen will be released to the corn crop as the residue breaks down. A C:N ratio below about 25 means decomposition will be relatively fast, and the nitrogen should become available early in the season.
 :::
 
 ```{r cc-summary, echo=FALSE, message=FALSE, warning=FALSE}
@@ -512,7 +512,8 @@ ggplotly(p, tooltip = "text") |> config(displaylogo = FALSE) |> layout(showlegen
 ## 🧪 C:N in Corn Biomass {#cn-details}
 
 ::: {.page-intro}
-Corn biomass was collected from the 10 N rate strips. Each strip had two sub-samples (A and B); their average is used as the plot value. The bar chart below shows the mean %N ± SE by N rate group. **Variable-rate strips (R0, R1, R6, R9) are averaged as one group**, allowing comparison with fixed-rate management. Given the small number of observations per group (n = 1–4), no formal ANOVA is applied; results are descriptive.
+Corn biomass was collected from the 10 N rate strips. Each strip had two sub-samples (A and B); their average is used as the plot value. The bar chart below shows the mean %N ± SE by N rate group. **Variable-rate strips (R0, R1, R6, R9) are averaged as one group**, allowing comparison with fixed-rate management. Because we have only one or two strips per N rate group, we can't do formal statistics, but the pattern across the groups gives us a useful 
+picture of how nitrogen rate affected what the plant actually took up.
 :::
 
 ::: {.panel-tabset}
@@ -579,7 +580,7 @@ ggplotly(p) |>
 ## 🌽 Cornstalk Nitrate Test (CSNT) {#csnt-details}
 
 ::: {.page-intro}
-The Cornstalk Nitrate Test (CSNT) measures nitrate concentration in the lower cornstalk at the end of the season. It is a post-harvest diagnostic tool: values **below 250 ppm indicate insufficient nitrogen**, while the **optimal range is between 750 and 2000 ppm**. Each strip had two samples (East = E, West = W positions), and their average is used as the plot value. 
+The Cornstalk Nitrate Test (CSNT) gives us a post-harvest look at whether the crop had enough nitrogen to carry it all the way through grain fill. It is a post-harvest diagnostic tool: values **below 250 ppm indicate insufficient nitrogen**, while the **optimal range is between 750 and 2000 ppm**. We sampled the lower stalk in two spots per strip, one on the East side and one on the West, and averaged them to get one value per strip. 
 :::
 
 ::: {.panel-tabset}
@@ -650,7 +651,8 @@ ggplotly(p) |>
 ## 🌱 Soil Health Assessment {#soilhealth}
 
 ::: {.page-intro}
-Soil health was assessed using the **Cornell Soil Health Test**. The overall quality score was **65/100 (High)**. Chemical indicators (pH, P, K, additional nutrients) all scored 100 - ideal. Key opportunities for improvement are in **biological indicators**: Organic Matter (score 22 - Low), Soil Respiration (score 22 - Low), and Predicted Soil Protein (score 37 - Low). These suggest that microbial activity and organic matter are limiting long-term soil function, which is directly relevant to the potential for internal nitrogen supply from cover crop residues.
+Soil health was assessed using the **Cornell Soil Health Test**. The overall quality score was **65/100 (High)**. Chemical indicators (pH, P, K, additional nutrients) all scored 100 - ideal. Key opportunities for improvement are in **biological indicators**: Organic matter, soil respiration, and predicted soil protein all scored Low, meaning the microbial community that breaks down residues 
+and cycles nutrients isn't as active as it could be yet. This is where your cover crop system is making its long-term investment, every season of cover cropping adds more carbon and feeds more microbes, gradually building the biological engine that can supply nitrogen from within the soil itself.
 :::
 
 ```{=html}
@@ -678,7 +680,9 @@ Soil health was assessed using the **Cornell Soil Health Test**. The overall qua
 ## 🌧️Weather & Drought Conditions {#weatherDrought}
 
 ::: {.page-intro}
-**Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index from June through November 2025.  
+**Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index from June through November 2025. Your field consistently tracked well below the all-site average for cumulative 
+rainfall from June through October, finishing the season around 250 mm compared to roughly 400 mm at the network average. Individual rain events were scattered and relatively small, the largest came in late June and 
+mid-August, but there were long dry stretches in between. Drought conditions were Low through August and most of September, then escalated to Mild for most of October before easing in November. This extended dry period is an important backdrop for interpreting your results: drier conditions can limit how much nitrogen the plant can take up from the soil, and may help explain why the lower N rate strips, especially the variable-rate strips, showed signs of tighter nitrogen supply by season end.  
 :::
 ```{=html}
 <figure style="margin: 0 0 24px; text-align: center;">
@@ -716,38 +720,29 @@ HTML(paste0('
 
  <div class="conc-card teal">
   <div class="conc-title">🌱 Cover Crop Biomass</div>
-  The cover crop averaged <strong>2.28% N</strong>. A C:N ratio below ~25 indicates 
-  the cover crop should release nitrogen relatively quickly during decomposition, 
-  potentially contributing to early-season corn N supply.
+  The cover crop came in at an average of <strong>2.28% N</strong> across the field. With a C:N ratio below 25, the residue is in the range where nitrogen should be released relatively quickly during decomposition, meaning some of that N was likely available to the corn early in the season, before fertilizer would have made a difference.
 </div>
 
 <div class="conc-card amber">
   <div class="conc-title">🧪 Biomass %N in Corn</div>
-  Across N rate groups, tissue nitrogen ranged from <strong>3.57% (25 lb N/ac)</strong> 
-  to <strong>4.17% (62 lb N/ac)</strong>. The higher rates tended to show higher tissue N, 
-  though with only 1–2 plots per group, formal statistical testing is not appropriate.
+Tissue nitrogen showed a clear trend with N rate, ranging from <strong>3.57% at 25 lb N/ac</strong> up to <strong>4.17% at 62 lb N/ac</strong>. Higher rates delivered more nitrogen to the plant. With only one or two strips per rate, we cannot confirm this statistically, but the direction is consistent and makes agronomic sense.
 </div>
 
 <div class="conc-card pink">
   <div class="conc-title">🌽 Cornstalk Nitrate (CSNT)</div>
-  End-of-season stalk nitrate increased with N rate: from <strong>336 ppm (25 lb N/ac)</strong> 
-  to <strong>943 ppm (62 lb N/ac)</strong>. All fixed-rate strips are above the 250 ppm deficiency 
-  threshold. Variable-rate strips averaged <strong>257 ppm</strong>, just above the threshold.
+ End-of-season stalk nitrate also increased with N rate — from <strong>336 ppm at 25 lb N/ac</strong> up to <strong>943 ppm at 62 lb N/ac</strong>. All fixed-rate strips cleared the 250 ppm sufficiency threshold. The variable-rate strips averaged just <strong>257 ppm</strong> — barely above the threshold, suggesting 
+those areas may have been cutting it close on nitrogen supply by harvest.
 </div>
 
 <div class="conc-card">
   <div class="conc-title">🌾 Corn Yield</div>
-  The 50 lb N/ac strip produced the highest mean yield at <strong>178.1 bu/ac</strong>, 
-  outperforming both the higher rate (62 lb N/ac = 170.8 bu/ac) and the variable-rate 
-  strips (155.7 bu/ac). This suggests that 50 lb N/ac may be near the economic optimum 
-  under these field conditions.
+The <strong>50 lb N/ac strip produced the highest yield at 178.1 bu/ac</strong>, outperforming the 62 lb N/ac strip (170.8 bu/ac) and the variable-rate strips (155.7 bu/ac). The yield did not keep climbing with more nitrogen, it peaked at 50 lb N/ac and dropped at the highest rate. That is a useful signal: somewhere around 50 lb N/ac may be close to the economic optimum for this field under cover crop management.
 </div>
 
 <div class="conc-card teal">
   <div class="conc-title">🌱 Soil Health</div>
   The overall soil health score of <strong>65/100 (High)</strong> reflects excellent chemical 
-  status but low biological activity. Continued cover cropping could improve organic matter 
-  and microbial activity over time, potentially reducing the need for applied N in future seasons.
+  status but low biological activity. Continued cover cropping could improve organic matter and microbial activity over time, potentially reducing the need for applied N in future seasons.
 </div>
 '))
 ```

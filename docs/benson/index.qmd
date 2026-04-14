@@ -553,7 +553,8 @@ ggplotly(p_yb) |> layout(showlegend = FALSE)
 ## 🌿 Nitrogen Balance Index (NBI) {#nbi-details}
 
 ::: {.page-intro}
-The **Nitrogen Balance Index (NBI)** is measured with the Dualex sensor and reflects the ratio of chlorophyll to flavonoids in the leaf. A higher NBI indicates better nitrogen status: the plant has enough N to build chlorophyll without accumulating excess flavonoids as a stress response. Two leaves per plant were measured and averaged. Results are compared between Control (no cover crop) and Treatment (clover cover crop) strips using a two-sample t-test.
+The **Nitrogen Balance Index (NBI)** gives us a real-time read on how well-supplied with nitrogen each corn plant is during the growing season. It works by measuring both chlorophyll (a sign of nitrogen sufficiency) and flavonoids (stress compounds that build up when the plant is nitrogen-stressed) in the same leaf. A higher NBI means the plant has plenty of nitrogen and is using it efficiently. We took two leaf readings per plant 
+with the Dualex sensor, averaged them, and compared the clover strips against the control using a statistical test to see if the difference was real.
 :::
 
 ```{r nbi-cards, echo=FALSE}
@@ -612,7 +613,8 @@ ggplotly(p) |> layout(showlegend=FALSE)
 ## 🍃 Chlorophyll (Chl) {#chl-details}
 
 ::: {.page-intro}
-The **Chlorophyll Index (Chl)** is also measured with the Dualex sensor and estimates the amount of chlorophyll in the leaf. Chlorophyll is directly linked to the plant's capacity for photosynthesis and is a reliable proxy for nitrogen sufficiency. Higher values indicate greener, more nitrogen-sufficient leaves. As with NBI, two leaves per plant were averaged and treatments compared with a t-test.
+Leaf greenness is one of the most direct, visible signals that a corn plant has enough nitrogen. The Chlorophyll Index, measured with the same Dualex sensor as the NBI, captures this at the leaf level. A higher value means 
+a greener, more photosynthetically active leaf, the kind of leaf that comes from a plant with good nitrogen access. We averaged two readings per plant and compared clover vs. control strips with a statistical test (t-test). When both the NBI and the chlorophyll are elevated in the same strips, that's a consistent and reliable signal. 
 :::
 
 ```{r chl-cards, echo=FALSE}
@@ -671,10 +673,14 @@ ggplotly(p) |> layout(showlegend=FALSE)
 ## 🧪 C:N in Corn Biomass —  {#cn-biomass-details}
 
 ::: {.page-intro}
-Corn biomass was collected and sent for laboratory C:N analysis. This measures the actual nitrogen concentration in the plant tissue, a direct indicator of how much N the plant was able to take up during the critical early growth window. **Note:** sample sizes are small (n = `r n_nocover_bio` Control, n = `r n_cover_bio` Treatment), so results are descriptive. Effect sizes (Cohen's d) are reported instead of p-values.
+Corn biomass was collected and sent for laboratory C:N analysis. This tells us how much nitrogen the plant had absorbed and incorporated into its tissue up to that point in the season, a more direct measure than the leaf sensor readings. Because the number of samples per treatment is small, we report effect size (Cohen's d) rather than a p-value. 
 :::
 
 ### Total Nitrogen in Biomass (%N)
+
+::: {.page-intro}
+A higher %N in the tissue means the plant had better access to nitrogen during the early-to-mid season growth window. The clover strips came in notably higher than the control, consistent with the in-season Dualex readings.
+:::
 
 ```{r cn-biomass-n-cards, echo=FALSE}
 cn_cards(
@@ -808,7 +814,8 @@ ggplotly(p_raw_CN_bio) |> layout(showlegend = FALSE)
 ## 🌾 C:N in Corn Grain {#cn-grain-details}
 
 ::: {.page-intro}
-Grain samples were collected and analyzed for C:N content. Nitrogen concentration in grain reflects the plant's ability to remobilize N during grain fill, a final-season indicator of whether the cover crop influenced overall nitrogen availability through the growing season.
+Grain samples were collected and analyzed for C:N content. A lower ratio means the tissue is more nitrogen-rich relative to its carbon content. If the clover strips show a lower C:N, it confirms that those plants were not just taking up more nitrogen in absolute terms, they were incorporating it more efficiently into their tissue structure. A C:N below 20 in corn 
+biomass at this growth stage is generally a sign of a well-nourished plant.
 :::
 
 ### Total Nitrogen in Grain (%N) 
@@ -1046,7 +1053,7 @@ Soil health was assessed using the **Cornell Soil Health Test**. The overall qua
 ## 🌧️Weather & Drought Conditions {#weatherDrought}
 
 ::: {.page-intro}
-**Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index from June through November 2025.  
+**Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index from June through November 2025. Your field had a very clean growing season from a weather standpoint. Rainfall was well-distributed from June through November, tracking closely with the all-site average and finishing near 400 mm cumulative. Individual rain events were moderate and spread out — no single extreme event, but also no prolonged dry spells. The drought index stayed at None for the entire growing season, from planting through harvest, with no drought stress recorded at any point.  
 :::
 ```{=html}
 <figure style="margin: 0 0 24px; text-align: center;">
