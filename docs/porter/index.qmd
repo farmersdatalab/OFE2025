@@ -329,7 +329,7 @@ This report summarizes the on-farm nitrogen experiment conducted in Field G7, wh
 ```
 
 ::: {.page-intro}
-**Take-home message:** Across the four nitrogen indicators — NBI, Chlorophyll Index, Biomass %N, and CSNT — treatment plots showed mixed responses compared to the control. The treatment increased chlorophyll relative to the control, indicating improved early-season plant vigor, but this did not translate into consistent improvements in overall nitrogen status or end-of-season sufficiency. With both treatments showing adequate nitrogen levels and high soil quality, the marginal benefit of the treatment appears limited under these conditions.
+**Take-home message:** The results this season were mixed. Plowing the sod earlier (Treatment) did produce greener, higher-chlorophyll leaves, a sign of better early-season vigor. But that early advantage didn't carry through to overall nitrogen status, tissue nitrogen, or a yield advantage by the end of the season. In fact, yield was slightly lower in the Treatment strips. Both systems kept the crop adequately supplied with nitrogen, Control CSNT came in just below the optimal threshold, Treatment just above it. Your soil is in good shape overall, and this is a question worth revisiting with another season of data.
 :::
 
 ---
@@ -381,7 +381,7 @@ knitr::kable(summary_df, align = c("l","c","c","c","c"))
 ## 🌾 Corn Yield {#yield}
 
 ::: {.page-intro}
-The map below shows the **corn yield spatial distribution** across Field G7, displayed in quantiles. The blue line marks the field boundary and the red lines separate the treatment strips.
+The map below shows the **corn yield spatial distribution** across Field G7, displayed in bushels per acre. The blue line marks the field boundary and the red lines separate the treatment strips.
 :::
 
 ```{=html}
@@ -497,7 +497,8 @@ n = `r n_ctrl_yield` Control pixels · n = `r n_cover_yield` Treatment pixels. T
 ## 🌿 Nitrogen Balance Index (NBI) {#nbi-details}
 
 ::: {.page-intro}
-The **Nitrogen Balance Index (NBI)** is measured with the Dualex sensor and reflects the ratio of chlorophyll to flavonoids in the leaf. A higher NBI indicates better nitrogen status: the plant has enough N to build chlorophyll without accumulating excess flavonoids as a stress response. Two leaves per plant were measured and averaged. Results are compared between Control and Treatment strips using a two-sample t-test.
+The **Nitrogen Balance Index (NBI)** is measured with a handheld Dualex sensor and gives us a real-time snapshot of how well the plant is supplied with nitrogen 
+during the season. It works by comparing how much chlorophyll the leaf has built relative to stress compounds (flavonoids), so a higher NBI means the plant is using nitrogen efficiently and not showing signs of stress. We took two leaf readings per plant and averaged them, then compared Treatment vs Control strips with a statistical test (two-sample t-test) to see if there was a real difference.
 :::
 
 ```{r nbi-cards, echo=FALSE}
@@ -607,10 +608,15 @@ ggplotly(p) |> layout(showlegend=FALSE)
 ## 🧪 C:N in Corn Biomass {#cn-details}
 
 ::: {.page-intro}
-Corn biomass was collected at the V6 stage and sent for laboratory C:N analysis. This measures the actual nitrogen concentration in the plant tissue, a direct indicator of how much N the plant was able to take up. **Note:** sample sizes are small (n = `r n_nocover_cn` Control, n = `r n_cover_cn` Treatment), so results are descriptive. Effect sizes (Cohen's d) are reported instead of p-values.
+we collected corn plant samples from both Treatment and 
+Control strips and sent them to the lab for nitrogen analysis. This tells us exactly how much nitrogen ended up inside the plant — not just what was in the soil or available in theory, but what the crop actually took up. Because the number of samples is small, we can't run a standard statistical test, but we report the effect size (Cohen's d) to give you a sense of how meaningful the difference is in practical terms.
 :::
 
 ### Total Nitrogen in Biomass (%N)
+::: {.page-intro}
+This measures what percentage of the plant tissue is nitrogen. A higher %N means the plant had good access to nitrogen at the time of sampling. In this case, the Control actually came in slightly higher than the Treatment, a small but noteworthy reversal compared to what the chlorophyll data suggested. It's a reminder that mid-season leaf readings and actual tissue nitrogen don't always tell the same story.
+
+:::
 
 ```{r cn-n-cards, echo=FALSE}
 cn_cards(
@@ -677,6 +683,13 @@ ggplotly(p_raw_N) |> layout(showlegend = FALSE)
 :::
 
 ### C:N Ratio
+
+::: {.page-intro}
+
+The C:N ratio flips the perspective: a lower number means the tissue is more nitrogen-rich relative to its carbon content. If the Treatment had incorporated more nitrogen from the legume sod early on, we'd expect a lower C:N ratio in those plants. The values across both treatments were fairly close, which is consistent with the %N results, both systems delivered similar amounts of 
+nitrogen to the plant at this growth stage.
+:::
+
 
 ```{r cn-ratio-cards, echo=FALSE}
 cn_cards(
@@ -746,7 +759,7 @@ ggplotly(p_raw_CN) |> layout(showlegend = FALSE)
 ## 🌽 Cornstalk Nitrate Test (CSNT) {#csnt-details}
 
 ::: {.page-intro}
-The Cornstalk Nitrate Test (CSNT) measures nitrate concentration in the lower cornstalk at the end of the season. It is a post-harvest diagnostic tool: values **below 250 ppm indicate insufficient nitrogen**, while the **optimal range is between 750 and 2000 ppm**. Because only **one sample per treatment** was collected, no statistical comparison is possible — this is a field-level observation.
+The Cornstalk Nitrate Test (CSNT) measures nitrate concentration in the lower cornstalk at the end of the season. It is a post-harvest diagnostic tool: values **below 250 ppm indicate insufficient nitrogen**, while the **optimal range is between 750 and 2000 ppm**. Because we only had one sample per treatment, this is a field-level observation rather than a statistical comparison.
 :::
 
 ```{r csnt-card, echo=FALSE}
@@ -794,7 +807,8 @@ ggplotly(p_csnt) |> layout(showlegend = FALSE)
 ## 🌱 Soil Health Assessment {#soilhealth}
 
 ::: {.page-intro}
-Soil health was assessed using the **Cornell Soil Health Test**. The overall quality score was **76/100 (High)**. Most indicators were in the High to Very High range. Key areas to monitor are **Surface Hardness** (score 53-Medium), **Subsurface Hardness** (score 51-Medium), and **Active Carbon** (score 52-Medium), all indicating some compaction and biological activity that could be improved.
+Soil health was assessed using the **Cornell Soil Health Test**. The overall quality score was **76/100 (High)**. Most indicators came back in the High to Very High range, which reflects years of good management. The areas to keep an eye on are surface and subsurface hardness (both Medium), which may indicate some compaction developing in the field, and active carbon (Medium), which reflects the level of readily available food for soil microbes. These are manageable, and continued cover cropping or diverse 
+rotations can help move those numbers up over time.
 :::
 
 ```{=html}
@@ -824,7 +838,9 @@ Soil health was assessed using the **Cornell Soil Health Test**. The overall qua
 ## 🌧️Weather & Drought Conditions {#weatherDrought}
 
 ::: {.page-intro}
-**Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index from June through November 2025.  
+**Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index from June through November 2025. Your field had a very consistent and well-distributed rainfall season in 2025. 
+Precipitation tracked closely with the all-site average from June through October, finishing near 400 mm cumulative. There were no major drought episodes: the drought index stayed at None for the entire growing season, from planting through harvest. Moisture was not a 
+limiting factor for your crop this year, which means the differences we see between Treatment and Control strips are more likely driven by management and soil factors than by weather. 
 :::
 ```{=html}
 <figure style="margin: 0 0 24px; text-align: center;">
@@ -870,22 +886,31 @@ HTML('
 
   <div class="conc-card teal">
     <div class="conc-title">🌿 Leaf Nitrogen Status (NBI)</div>
-    <strong>Treatment</strong> plots showed a <strong>0.7% higher NBI</strong> compared to Control (59.9 vs 59.5). This difference was <strong>not statistically significant in in-season nitrogen status between treatments</strong>, suggesting that the timing of sod plowing had minimal impact on early-season plant nitrogen status as measured by NBI.
+    NBI was nearly identical between the two systems — Treatment at <strong>59.9</strong> 
+vs Control at <strong>59.5</strong>, a difference of less than 1%. Plowing the sod earlier did not change how much nitrogen the plant had available mid-season, at least as far as the NBI reading could detect. Both strips were in a similar range.
   </div>
 
   <div class="conc-card">
     <div class="conc-title">🍃 Chlorophyll Index (Chl)</div>
-    Chlorophyll values were <strong>higher in Treatment plots (+9.1%)</strong>. This <strong>statistically significant difference</strong> is consistent with improved nitrogen uptake in Treatment plots. However, the increase in chlorophyll did not correspond to a significant increase in NBI, indicating that while leaves were greener, overall nitrogen balance was not markedly improved.
+    Chlorophyll was <strong>9.1% higher</strong> in the Treatment strips, a statistically significant difference. The leaves in the earlier-plowed strips were noticeably greener, suggesting a stronger early-season start. However, this did not translate into a higher NBI or better tissue nitrogen, so the early vigor advantage did not persist through the full season.
   </div>
 
   <div class="conc-card amber">
     <div class="conc-title">🧪 Biomass Nitrogen (%N)</div>
-    Laboratory analysis of corn biomass showed <strong>Treatment plants had -3.7% less nitrogen</strong> in their tissue (3.775% vs 3.92%). The effect size suggests a meaningful biological difference, though the small sample size prevents formal statistical testing. 
+    Lab analysis showed Treatment plants had slightly <strong>less nitrogen in 
+their tissue</strong> than Control (3.775% vs 3.92%, a difference of -3.7%). 
+The effect size was small, and the sample size is too limited for a firm 
+conclusion, but the direction is worth noting, as it runs counter to what 
+the chlorophyll result suggested.
   </div>
 
   <div class="conc-card pink">
     <div class="conc-title">🌽 End-of-Season CSNT</div>
-    The Cornstalk Nitrate Test showed Control at 661 ppm and Treatment at 771 ppm, showing that the <strong>treatment had sufficient nitrogen at season end</strong>. With only one sample per treatment, this is a descriptive observation.
+    The stalk nitrate test showed Control at <strong>661 ppm</strong>, just 
+below the 750 ppm optimal threshold, and Treatment at <strong>771 ppm</strong>, 
+just inside the optimal range. Both crops finished the season reasonably 
+well-supplied with nitrogen. With one sample per treatment, this is an 
+observation to carry forward into next seasons analysis.
   </div>
 
   <div class="conc-card teal">

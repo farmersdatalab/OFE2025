@@ -294,7 +294,10 @@ This report summarizes the on-farm nitrogen experiment conducted in your field, 
 ```
 
 ::: {.page-intro}
-**Take-home message:** Across all four nitrogen indicators — NBI, Chlorophyll, Biomass %N, and CSNT — corn plants in the cover crop strips consistently showed higher nitrogen status than control plots. With 57 lb N/ac applied to the entire field, the cover crop appears to have contributed additional plant-available nitrogen, either through residue decomposition or improved soil nitrogen cycling. While sample sizes for the biomass analysis are small, the direction of the effect is consistent across all measurements. This is a promising signal worth tracking in future seasons with larger sample numbers.
+**Take-home message:** 
+Across all four nitrogen indicators (NBI, Chlorophyll, Biomass %N, and CSNT) corn plants in the cover crop strips consistently showed better nitrogen status than those in 
+the control strips. Leaf readings were greener and more nitrogen-sufficient, plant tissue had noticeably more nitrogen, and end-of-season stalk nitrate revealed a clear difference between treatments: control stalks were well below the sufficiency threshold, while cover crop stalks were within the optimal range. Your soil health score is solid overall, but building biological activity through 
+continued cover cropping is the clearest path to unlocking even more nitrogen from the soil over time.
 :::
 
 ---
@@ -342,7 +345,7 @@ knitr::kable(summary_df, align = c("l","c","c","c","c"))
 ## 🌾 Corn Yield {#yield}
 
 ::: {.page-intro}
-The map below shows the **corn yield spatial distribution** across Field 3, displayed in quantiles.
+The map below shows the **corn yield spatial distribution** across Field 3, displayed in tons per acre.
 :::
 
 ```{=html}
@@ -378,7 +381,8 @@ The map below shows the **corn yield spatial distribution** across Field 3, disp
 ## 🌿 Nitrogen Balance Index (NBI) {#nbi-details}
 
 ::: {.page-intro}
-The **Nitrogen Balance Index (NBI)** is measured with the Dualex sensor and reflects the ratio of chlorophyll to flavonoids in the leaf. A higher NBI indicates better nitrogen status, the plant has enough N to build chlorophyll without accumulating excess flavonoids as a stress response. Two leaves per plant were measured and averaged. Results are compared between Control and Treatment strips using a two-sample t-test.
+The **Nitrogen Balance Index (NBI)** is measured with the Dualex sensor and reflects the ratio of chlorophyll to flavonoids in the leaf. A higher NBI indicates better nitrogen status, the plant has enough N to build chlorophyll without accumulating excess flavonoids as a stress response. e took two readings per plant and averaged them, then compared the 
+cover crop strips against the control strips to see if the cover crop made a difference using a two-sample t-test.The result was statistically significant, meaning the difference we saw is real and not just random field variation. 
 :::
 
 ```{r nbi-cards, echo=FALSE}
@@ -488,7 +492,8 @@ ggplotly(p) |> layout(showlegend=FALSE)
 ## 🧪 C:N in Corn Biomass {#cn-details}
 
 ::: {.page-intro}
-Corn biomass was collected at the V6 stage and sent for laboratory C:N analysis. This measures the actual nitrogen concentration in the plant tissue, a direct indicator of how much N the plant was able to take up. **Note:** sample sizes are small (n = `r n_nocover_cn` Control, n = `r n_cover_cn` Treatment), so results are descriptive. Effect sizes (Cohen's d) are reported instead of p-values.
+Corn biomass was collected and sent for laboratory C:N analysis. This measures the actual nitrogen concentration in the plant tissue, a direct indicator of how much N the plant was able to take up. **Note:** Because we only had a small number of samples per treatment, we can't run 
+a full statistical test, but the effect size gives us a good sense of whether the difference is biologically meaningful.
 :::
 
 ### Total Nitrogen in Biomass (%N)
@@ -630,7 +635,7 @@ ggplotly(p_raw_CN) |> layout(showlegend = FALSE)
 ## 🌽 Cornstalk Nitrate Test (CSNT) {#csnt-details}
 
 ::: {.page-intro}
-The Cornstalk Nitrate Test (CSNT) measures nitrate concentration in the lower cornstalk at the end of the season. It is a post-harvest diagnostic tool: values **below 250 ppm indicate insufficient nitrogen**, while the **optimal range is between 750 and 2000 ppm**. Because only **one sample per treatment** was collected, no statistical comparison is possible — this is a field-level observation.
+The Cornstalk Nitrate Test (CSNT) measures nitrate concentration in the lower cornstalk at the end of the season. It is a post-harvest diagnostic tool: values **below 250 ppm indicate insufficient nitrogen**, while the **optimal range is between 750 and 2000 ppm**. Because only **one sample per treatment** was collected, no statistical comparison is possible, this is a field-level observation.
 :::
 
 ```{r csnt-card, echo=FALSE}
@@ -678,7 +683,8 @@ ggplotly(p_csnt) |> layout(showlegend = FALSE)
 ## 🌱 Soil Health Assessment {#soilhealth}
 
 ::: {.page-intro}
-Soil health was assessed using the **Cornell Soil Health Test** (sampled 06/11/2025, Field 3). The overall quality score was **69/100 (High)**. Key constraints identified were **Soil Respiration** (score 16-Very Low) and **Active Carbon** (score 34-Low), both indicating that soil microbial activity and available carbon could be improved. Physical indicators were generally good, with strong scores for Available Water Capacity (87) and Surface Hardness (75).
+Soil health was assessed using the **Cornell Soil Health Test** (sampled 06/11/2025, Field 3). The overall quality score was **69/100 (High)**. The physical structure of your soil is strong: water holding capacity and surface hardness both came back well. The area to watch 
+is biological activity, soil respiration and active carbon scored low, which means the microbial community that breaks down organic matter and cycles nutrients isn't as active as it could be. The good news is that cover cropping directly targets exactly this: feeding soil microbes, adding carbon, and building the biological engine of your soil over time.
 :::
 
 ```{=html}
@@ -708,7 +714,8 @@ Soil health was assessed using the **Cornell Soil Health Test** (sampled 06/11/2
 ## 🌧️Weather & Drought Conditions {#weatherDrought}
 
 ::: {.page-intro}
-**Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index from June through November 2025.  
+**Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index from June through November 2025. Your field had one of the wettest seasons across all sites in 2025. Cumulative rainfall reached nearly 600 mm, well above the all-site average, with consistent precipitation from June through September and a strong pulse of rain during late August and early September. Drought stress was essentially 
+absent all season, with only a brief Low signal in early November.  
 :::
 ```{=html}
 <figure style="margin: 0 0 24px; text-align: center;">
@@ -754,9 +761,9 @@ HTML(paste0('
 
   <div class="conc-card teal">
   <div class="conc-title">🌿 Leaf Nitrogen Status (NBI)</div>
-  Treatment plots showed a <strong>12.8% higher NBI</strong> compared to Control
-  (76 vs 67.4), indicating that corn plants in cover crop strips had
-  significantly better in-season nitrogen status at the time of measurement.
+  Cover crop strips showed a <strong>12.8% higher NBI</strong> compared to the 
+control (76 vs 67.4). That means corn plants growing in the cover crop strips 
+had significantly better nitrogen status mid-season, a clear and statistically meaningful difference.
 </div>
 
   <div class="conc-card">
@@ -775,21 +782,21 @@ HTML(paste0('
 
   <div class="conc-card pink">
   <div class="conc-title">🌽 End-of-Season CSNT</div>
-  The Cornstalk Nitrate Test showed a striking difference: Control at
-  <strong>79 ppm</strong>, well below the 250 ppm sufficiency threshold, 
-  versus Treatment at <strong>938 ppm</strong>, within the optimal range
-  (750–2000 ppm). This suggests that control plots may have experienced
-  nitrogen deficiency late in the season, while cover crop strips maintained
-  adequate N supply through harvest.
+  The stalk nitrate result is the most striking finding of the season. The control 
+came in at just <strong>79 ppm</strong>, well below the 250 ppm sufficiency 
+threshold, indicating the crop ran short on nitrogen late in the season. The 
+cover crop strip came in at <strong>938 ppm</strong>, right in the optimal range 
+(750–2,000 ppm). The cover crop appears to have kept nitrogen flowing to the 
+plant all the way through harvest.
 </div>
 
 <div class="conc-card teal">
   <div class="conc-title">🌱 Soil Health</div>
-  The overall soil health score of <strong>69/100 (High)</strong> reflects
-  good physical structure but low biological activity, particularly Soil
-  Respiration (score 16) and Active Carbon (score 34). Continued cover
-  cropping could directly address these constraints by feeding soil microbial
-  communities and building organic matter over time.
+Your overall soil health score of <strong>69/100 (High)</strong> reflects good 
+physical structure but low biological activity, particularly soil respiration 
+(score 16) and active carbon (score 34). Continued cover cropping is the most 
+direct way to address both: more organic inputs mean more microbial activity, 
+which means more nitrogen cycling from the soil itself over time.
 </div>
 
 
