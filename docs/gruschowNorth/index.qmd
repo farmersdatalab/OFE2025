@@ -179,7 +179,7 @@ cn_interp <- function(cn) {
       </div>
       <span class="lab-title">2025 Cropping Season</span>
       <span class="lab-subtitle">
-        Field North &nbsp;|&nbsp; NRate `r gn_nrate_val` lb N/ac &nbsp;|&nbsp;
+        Field M5F2S2 &nbsp;|&nbsp; NRate `r gn_nrate_val` lb N/ac &nbsp;|&nbsp;
         <strong>Field monitoring report — single N rate, no treatment split</strong>
       </span>
     </div>
@@ -196,7 +196,7 @@ cn_interp <- function(cn) {
 
 ::: {.page-intro}
 **Welcome to your 2025 farm report.**
-This report summarizes field-season measurements for the **North** field. Because this field ran under a single nitrogen rate of 163 lb N/ac with no treatment or control strips, we're not comparing two systems here, instead, 
+This report summarizes field-season measurements for the **M5F2S2** field. Because this field ran under a single nitrogen rate of 163 lb N/ac with no treatment or control strips, we're not comparing two systems here, instead, 
 we're giving you a field-level picture of how the corn crop performed, what the cover crop residue looked like going into the season, and what the soil health assessment tells us about the foundation you're working with. Think of this as your baseline.
 :::
 
@@ -210,7 +210,7 @@ we're giving you a field-level picture of how the corn crop performed, what the 
     onerror="this.style.display='none'"
   />
   <figcaption style="font-size: 0.82rem; color: #6b7280; margin-top: 8px;">
-    <strong>Figure 1.</strong> North field.
+    <strong>Figure 1.</strong> M5F2S2 field.
   </figcaption>
 </figure>
 
@@ -276,7 +276,7 @@ field-level observations. No statistical comparisons between groups are reported
 ## 🌽 C:N in Corn Biomass {#cn-biomass}
 
 ::: {.page-intro}
-Corn biomass was collected from **`r bio_sum$n` plots** across the North field and sent to the laboratory for C:N analysis. This tells us how much nitrogen the plant had absorbed and incorporated into its tissue mid-season, a direct indicator of nitrogen sufficiency at the `r gn_nrate_val` lb N/ac input rate. Because there is no treatment split, we describe the **field-level
+Corn biomass was collected from **`r bio_sum$n` points** across the North field and sent to the laboratory for C:N analysis. This tells us how much nitrogen the plant had absorbed and incorporated into its tissue mid-season, a direct indicator of nitrogen sufficiency at the `r gn_nrate_val` lb N/ac input rate. Because there is no treatment split, we describe the **field-level
 distribution and spatial variability** across plots.
 :::
 
@@ -291,7 +291,7 @@ p_n_bio <- ggplot(gn_biomass, aes(x = factor(Plot), y = TotalN_pct)) +
   geom_col(fill = col_bio, color = "black", alpha = 0.85, width = 0.65) +
   geom_hline(yintercept = bio_sum$mean_N, linetype = "dashed",
              color = col_pink, linewidth = 0.9) +
-  annotate("text", x = 0.7, y = bio_sum$mean_N + 0.03,
+  annotate("text", x = 4.5, y = bio_sum$mean_N + 0.1,
            label = paste0("Mean: ", bio_sum$mean_N, "%"),
            color = col_pink, size = 3.5, hjust = 0) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
@@ -336,7 +336,7 @@ p_cn_bio <- ggplot(gn_biomass, aes(x = factor(Plot), y = CN_ratio)) +
   geom_col(fill = col_bio, color = "black", alpha = 0.85, width = 0.65) +
   geom_hline(yintercept = bio_sum$mean_CN, linetype = "dashed",
              color = col_pink, linewidth = 0.9) +
-  annotate("text", x = 0.7, y = bio_sum$mean_CN + 0.15,
+  annotate("text", x = 1.7, y = bio_sum$mean_CN + 0.35,
            label = paste0("Mean: ", bio_sum$mean_CN),
            color = col_pink, size = 3.5, hjust = 0) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
@@ -387,7 +387,7 @@ ggplotly(p_scatter, tooltip = "text") |> layout(showlegend = FALSE)
 ## 🌱 Cover Crop C:N {#cn-covercrop}
 
 ::: {.page-intro}
-**`r cc_sum$n` cover crop samples** were collected from Gruschow North and analyzed for C:N content. The C:N ratio of cover crop residue tells us how quickly it will break down and release its nitrogen to the following corn crop. A C:N below 25 means decomposition happens relatively fast, the nitrogen becomes available early in the season, right when the young corn plant is establishing its root system and building its nitrogen demand. The bar charts below show the %N and C:N ratio for each sample location.
+**`r cc_sum$n` cover crop samples** were collected from field M5F2S2 and analyzed for C:N content. The C:N ratio of cover crop residue tells us how quickly it will break down and release its nitrogen to the following corn crop. A C:N below 25 means decomposition happens relatively fast, the nitrogen becomes available early in the season, right when the young corn plant is establishing its root system and building its nitrogen demand. The bar charts below show the %N and C:N ratio for each sample location.
 :::
 
 ```{r cc-cards, echo=FALSE}
@@ -415,7 +415,7 @@ p_cc_n <- ggplot(gn_cover, aes(x = factor(Plot), y = TotalN_pct)) +
   geom_col(fill = col_cover, color = "black", alpha = 0.85, width = 0.65) +
   geom_hline(yintercept = cc_sum$mean_N, linetype = "dashed",
              color = col_pink, linewidth = 0.9) +
-  annotate("text", x = 0.9, y = cc_sum$mean_N + 0.03,
+  annotate("text", x = 2.2, y = cc_sum$mean_N + 0.09,
            label = paste0("Mean: ", cc_sum$mean_N, "%"),
            color = col_pink, size = 3.5, hjust = 0) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
