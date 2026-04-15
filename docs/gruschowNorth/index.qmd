@@ -223,7 +223,7 @@ we're giving you a field-level picture of how the corn crop performed, what the 
             padding: 10px 20px; border-radius: 8px; text-decoration: none;
             font-size: 0.95rem; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
             transition: opacity 0.2s;">
-    🗺️ Open Interactive Map
+    🗺️ Open Interactive NDVI Map
   </a>
 </div>
 ```
@@ -231,7 +231,7 @@ we're giving you a field-level picture of how the corn crop performed, what the 
 ::: {.page-intro}
 **Take-home message:**
 The corn crop across this field showed solid and 
-consistent nitrogen status mid-season, with tissue nitrogen averaging 2.76% across the sampled plots, a sign the crop was well-supplied at the 163 lb N/ac input rate. The cover crop residue had a C:N ratio of 22.6, low enough to release nitrogen relatively quickly early in the season, which is a good sign for future nitrogen credit potential. The main concern from the soil health assessment is surface compaction, scored 10/100, which is worth addressing before it limits rooting and water movement long-term. Chemistry is excellent across the board. A clean growing season with no drought stress during the critical window rounded out a solid year.
+consistent nitrogen status mid-season, with tissue nitrogen averaging 2.76% across the sampled points, a sign the crop was well-supplied at the 163 lb N/ac input rate. The cover crop residue had a C:N ratio of 22.6, low enough to release nitrogen relatively quickly early in the season, which is a good sign for future nitrogen credit potential. The main concern from the soil health assessment is surface compaction, scored 10/100, which is worth addressing before it limits rooting and water movement long-term. Chemistry is excellent across the board. A clean growing season with no drought stress during the critical window rounded out a solid year.
 :::
 
 ---
@@ -277,7 +277,7 @@ field-level observations. No statistical comparisons between groups are reported
 
 ::: {.page-intro}
 Corn biomass was collected from **`r bio_sum$n` points** across the North field and sent to the laboratory for C:N analysis. This tells us how much nitrogen the plant had absorbed and incorporated into its tissue mid-season, a direct indicator of nitrogen sufficiency at the `r gn_nrate_val` lb N/ac input rate. Because there is no treatment split, we describe the **field-level
-distribution and spatial variability** across plots.
+distribution and spatial variability** across points.
 :::
 
 ### Total Nitrogen in Biomass (%N)

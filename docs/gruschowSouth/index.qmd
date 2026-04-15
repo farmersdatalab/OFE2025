@@ -50,18 +50,18 @@ cn_raw <- read_csv(
   show_col_types = FALSE
 )
 
-# ---- Gruschow North · Maize Biomass ----
-gn_biomass <- cn_raw |>
-  filter(FarmField == "gruschowNorth", SampleType == "MaizeBiomass") |>
+# ---- Gruschow South · Maize Biomass ----
+gs_biomass <- cn_raw |>
+  filter(FarmField == "gruschowSouth", SampleType == "MaizeBiomass") |>
   filter(!is.na(TotalC_pct), !is.na(TotalN_pct)) |>
   mutate(
     CN_ratio = TotalC_pct / TotalN_pct,
     Plot     = as.integer(Plot)
   )
 
-# ---- Gruschow North · Cover Crop ----
-gn_cover <- cn_raw |>
-  filter(FarmField == "gruschowNorth", SampleType == "CoverCrop") |>
+# ---- Gruschow South · Cover Crop ----
+gs_cover <- cn_raw |>
+  filter(FarmField == "gruschowSouth", SampleType == "CoverCrop") |>
   filter(!is.na(TotalC_pct), !is.na(TotalN_pct)) |>
   mutate(
     CN_ratio = TotalC_pct / TotalN_pct,
@@ -71,7 +71,7 @@ gn_cover <- cn_raw |>
 # ============================================================
 #  RESUMEN ESTADÍSTICO — MAIZE BIOMASS
 # ============================================================
-bio_sum <- gn_biomass |>
+bio_sum <- gs_biomass |>
   summarise(
     n       = n(),
     mean_N  = round(mean(TotalN_pct), 3),
@@ -91,7 +91,7 @@ bio_sum <- gn_biomass |>
 # ============================================================
 #  RESUMEN ESTADÍSTICO — COVER CROP
 # ============================================================
-cc_sum <- gn_cover |>
+cc_sum <- gs_cover |>
   summarise(
     n       = n(),
     mean_N  = round(mean(TotalN_pct), 3),
@@ -109,15 +109,15 @@ cc_sum <- gn_cover |>
   )
 
 # ============================================================
-#  N RATE — GRUSCHOW NORTH
+#  N RATE — GRUSCHOW SOUTH
 # ============================================================
 nrates       <- read_csv(file.path(data_dir, nrate_file), show_col_types = FALSE)
-gn_nrate_val <- nrates |>
+gs_nrate_val <- nrates |>
   filter(tolower(FarmName) == "gruschow",
-         tolower(FieldName) == "north") |>
+         tolower(FieldName) == "south") |>
   pull(Nrate_lbAc) |>
   first()
-gn_nrate_val <- if (is.na(gn_nrate_val) || length(gn_nrate_val) == 0) "N/A" else gn_nrate_val
+gs_nrate_val <- if (is.na(gs_nrate_val) || length(gs_nrate_val) == 0) "N/A" else gs_nrate_val
 
 # ============================================================
 #  PALETA Y HELPERS
@@ -179,7 +179,7 @@ cn_interp <- function(cn) {
       </div>
       <span class="lab-title">2025 Cropping Season</span>
       <span class="lab-subtitle">
-        Field M5F2S2 &nbsp;|&nbsp; NRate `r gn_nrate_val` lb N/ac &nbsp;|&nbsp;
+        Field M4F2S2 &nbsp;|&nbsp; NRate `r gs_nrate_val` lb N/ac &nbsp;|&nbsp;
         <strong>Field monitoring report — single N rate, no treatment split</strong>
       </span>
     </div>
@@ -196,26 +196,26 @@ cn_interp <- function(cn) {
 
 ::: {.page-intro}
 **Welcome to your 2025 farm report.**
-This report summarizes field-season measurements for the **M5F2S2** field. Because this field ran under a single nitrogen rate of 163 lb N/ac with no treatment or control strips, we're not comparing two systems here, instead, 
+This report summarizes field-season measurements for the **M4F2S2** field. Because this field ran under a single nitrogen rate of 163 lb N/ac with no treatment or control strips, we're not comparing two systems here, instead, 
 we're giving you a field-level picture of how the corn crop performed, what the cover crop residue looked like going into the season, and what the soil health assessment tells us about the foundation you're working with. Think of this as your baseline.
 :::
 
 ```{=html}
 <figure style="margin: 20px 0; text-align: center;">
   <img
-    src="images/gruschowNorth_field.png"
-    alt="Gruschow North field map"
+    src="images/GruschowSouth_field.png"
+    alt="Gruschow South field map"
     style="max-width: 100%; border-radius: 8px; border: 1px solid #e5e7eb;
            box-shadow: 0 2px 8px rgba(0,0,0,0.07);"
     onerror="this.style.display='none'"
   />
   <figcaption style="font-size: 0.82rem; color: #6b7280; margin-top: 8px;">
-    <strong>Figure 1.</strong> M5F2S2 field.
+    <strong>Figure 1.</strong> M4F2S2 field.
   </figcaption>
 </figure>
 
 <div style="margin: 16px 0 24px; text-align: center;">
-  <a href="https://farmersdatalab.github.io/c4b8a12e-7d55-4f9b-b3a1-5e2d6c9f8a11/"
+  <a href=""https://farmersdatalab.github.io/91e3d7b4-2a6f-4c0a-8e1d-3f7b5c9a6d88/"
      target="_blank"
      rel="noopener noreferrer"
      style="display: inline-flex; align-items: center; gap: 8px;
@@ -223,15 +223,14 @@ we're giving you a field-level picture of how the corn crop performed, what the 
             padding: 10px 20px; border-radius: 8px; text-decoration: none;
             font-size: 0.95rem; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
             transition: opacity 0.2s;">
-    🗺️ Open Interactive Map
+    🗺️ Open Interactive NDVI Map
   </a>
 </div>
 ```
 
 ::: {.page-intro}
 **Take-home message:**
-The corn crop across this field showed solid and 
-consistent nitrogen status mid-season, with tissue nitrogen averaging 2.76% across the sampled plots, a sign the crop was well-supplied at the 163 lb N/ac input rate. The cover crop residue had a C:N ratio of 22.6, low enough to release nitrogen relatively quickly early in the season, which is a good sign for future nitrogen credit potential. The main concern from the soil health assessment is surface compaction, scored 10/100, which is worth addressing before it limits rooting and water movement long-term. Chemistry is excellent across the board. A clean growing season with no drought stress during the critical window rounded out a solid year.
+The corn crop across this field showed high and consistent nitrogen status mid-season, with tissue nitrogen averaging `r bio_sum$mean_N`% across the sampled points, reflecting strong crop nitrogen uptake at the `r gs_nrate_val` lb N/ac input rate. The cover crop residue had a C:N ratio of `r cc_sum$mean_CN`, placing it in the moderate range, decomposition will be gradual, with nitrogen releasing steadily through the season rather than all at once. The soil health assessment returned an overall score of **66/100 (High)**. Chemical indicators are excellent across the board. The main areas to watch are biological and physical structure: soil respiration (24), predicted soil protein (32), and aggregate stability (36) are all in the Low range, and surface and subsurface hardness are at medium functioning. These are the indicators that improve most with reduced tillage and continuous cover cropping over time.
 :::
 
 ---
@@ -252,7 +251,7 @@ summary_df <- tibble(
     as.character(bio_sum$mean_CN),
     paste0(cc_sum$mean_N, "%"),
     as.character(cc_sum$mean_CN),
-    "62 / 100"
+    "66 / 100"
   ),
   SD = c(
     paste0("± ", bio_sum$sd_N),
@@ -276,8 +275,8 @@ field-level observations. No statistical comparisons between groups are reported
 ## 🌽 C:N in Corn Biomass {#cn-biomass}
 
 ::: {.page-intro}
-Corn biomass was collected from **`r bio_sum$n` points** across the North field and sent to the laboratory for C:N analysis. This tells us how much nitrogen the plant had absorbed and incorporated into its tissue mid-season, a direct indicator of nitrogen sufficiency at the `r gn_nrate_val` lb N/ac input rate. Because there is no treatment split, we describe the **field-level
-distribution and spatial variability** across plots.
+Corn biomass was collected from **`r bio_sum$n` points** across the South field and sent to the laboratory for C:N analysis. This tells us how much nitrogen the plant had absorbed and incorporated into its tissue mid-season, a direct indicator of nitrogen sufficiency at the `r gs_nrate_val` lb N/ac input rate. Because there is no treatment split, we describe the **field-level
+distribution and spatial variability** across points.
 :::
 
 ### Total Nitrogen in Biomass (%N)
@@ -287,7 +286,7 @@ distribution and spatial variability** across plots.
 ## Bar Chart (%N by plot)
 
 ```{r bio-n-bar, echo=FALSE, message=FALSE, warning=FALSE}
-p_n_bio <- ggplot(gn_biomass, aes(x = factor(Plot), y = TotalN_pct)) +
+p_n_bio <- ggplot(gs_biomass, aes(x = factor(Plot), y = TotalN_pct)) +
   geom_col(fill = col_bio, color = "black", alpha = 0.85, width = 0.65) +
   geom_hline(yintercept = bio_sum$mean_N, linetype = "dashed",
              color = col_pink, linewidth = 0.9) +
@@ -298,9 +297,9 @@ p_n_bio <- ggplot(gn_biomass, aes(x = factor(Plot), y = TotalN_pct)) +
   labs(
     title    = "Total Nitrogen in Corn Biomass by Plot (%N)",
     subtitle = paste0("Mean = ", bio_sum$mean_N, "%  |  SD = ", bio_sum$sd_N,
-                      "  |  n = ", bio_sum$n, " plots  |  Gruschow North, July 14 2025"),
+                      "  |  n = ", bio_sum$n, " plots  |  Gruschow South, July 14 2025"),
     x = "Plot", y = "Total Nitrogen (%)",
-    caption  = "Dashed line = field mean. Plot 5 excluded (NA in raw data)."
+    caption  = "Dashed line = field mean. Plots 5 and 8 excluded (NA in raw data)."
   ) +
   theme_minimal(base_size = 13) +
   theme(plot.title = element_text(face = "bold"),
@@ -332,7 +331,7 @@ cards_row(
 ## Bar Chart (C:N by plot)
 
 ```{r bio-cn-bar, echo=FALSE, message=FALSE, warning=FALSE}
-p_cn_bio <- ggplot(gn_biomass, aes(x = factor(Plot), y = CN_ratio)) +
+p_cn_bio <- ggplot(gs_biomass, aes(x = factor(Plot), y = CN_ratio)) +
   geom_col(fill = col_bio, color = "black", alpha = 0.85, width = 0.65) +
   geom_hline(yintercept = bio_sum$mean_CN, linetype = "dashed",
              color = col_pink, linewidth = 0.9) +
@@ -359,7 +358,7 @@ ggplotly(p_cn_bio) |> layout(showlegend = FALSE)
 ## Scatter %C vs %N
 
 ```{r bio-scatter, echo=FALSE, message=FALSE, warning=FALSE}
-p_scatter <- ggplot(gn_biomass,
+p_scatter <- ggplot(gs_biomass,
                     aes(x = TotalN_pct, y = TotalC_pct,
                         text = paste0("Plot: ", Plot,
                                       "<br>%N: ", TotalN_pct,
@@ -387,7 +386,7 @@ ggplotly(p_scatter, tooltip = "text") |> layout(showlegend = FALSE)
 ## 🌱 Cover Crop C:N {#cn-covercrop}
 
 ::: {.page-intro}
-**`r cc_sum$n` cover crop samples** were collected from field M5F2S2 and analyzed for C:N content. The C:N ratio of cover crop residue tells us how quickly it will break down and release its nitrogen to the following corn crop. A C:N below 25 means decomposition happens relatively fast, the nitrogen becomes available early in the season, right when the young corn plant is establishing its root system and building its nitrogen demand. The bar charts below show the %N and C:N ratio for each sample location.
+**`r cc_sum$n` cover crop samples** were collected from field M4F2S2 and analyzed for C:N content. The C:N ratio of cover crop residue tells us how quickly it will break down and release its nitrogen to the following corn crop. A C:N below 25 means decomposition happens relatively fast, the nitrogen becomes available early in the season, right when the young corn plant is establishing its root system and building its nitrogen demand. The bar charts below show the %N and C:N ratio for each sample location.
 :::
 
 ```{r cc-cards, echo=FALSE}
@@ -411,18 +410,18 @@ cards_row(
 ### Total Nitrogen in Cover Crop (%N)
 
 ```{r cc-n-bar, echo=FALSE, message=FALSE, warning=FALSE}
-p_cc_n <- ggplot(gn_cover, aes(x = factor(Plot), y = TotalN_pct)) +
+p_cc_n <- ggplot(gs_cover, aes(x = factor(Plot), y = TotalN_pct)) +
   geom_col(fill = col_cover, color = "black", alpha = 0.85, width = 0.65) +
   geom_hline(yintercept = cc_sum$mean_N, linetype = "dashed",
              color = col_pink, linewidth = 0.9) +
-  annotate("text", x = 2.2, y = cc_sum$mean_N + 0.09,
+  annotate("text", x = 3.2, y = cc_sum$mean_N + 0.09,
            label = paste0("Mean: ", cc_sum$mean_N, "%"),
            color = col_pink, size = 3.5, hjust = 0) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
   labs(
     title    = "Total Nitrogen in Cover Crop (%N)",
     subtitle = paste0("Mean = ", cc_sum$mean_N, "%  |  SD = ", cc_sum$sd_N,
-                      "  |  n = ", cc_sum$n, " samples  |  Gruschow North"),
+                      "  |  n = ", cc_sum$n, " samples  |  Gruschow South"),
     x = "Sample", y = "Total Nitrogen (%)",
     caption  = "Dashed line = field mean."
   ) +
@@ -437,7 +436,7 @@ ggplotly(p_cc_n) |> layout(showlegend = FALSE)
 ### C:N Ratio — Cover Crop
 
 ```{r cc-cn-bar, echo=FALSE, message=FALSE, warning=FALSE}
-p_cc_cn <- ggplot(gn_cover, aes(x = factor(Plot), y = CN_ratio)) +
+p_cc_cn <- ggplot(gs_cover, aes(x = factor(Plot), y = CN_ratio)) +
   geom_col(fill = col_cover, color = "black", alpha = 0.85, width = 0.65) +
   
   labs(
@@ -463,9 +462,7 @@ ggplotly(p_cc_cn) |> layout(showlegend = FALSE)
 ## 🌿 Soil Health Assessment {#soilhealth}
 
 ::: {.page-intro}
-Soil health was assessed using the **Cornell Soil Health Test**. The overall quality score was **62/100 (High)**. Chemistry is in excellent shape across the board: pH at 6.5, phosphorus, potassium, and all additional nutrients all came back at 100. The area that needs attention is physical structure. Surface hardness scored 10/100, 
-the only red indicator in the entire report, meaning the top layer of your soil is compacted enough to restrict root growth and slow water movement through the profile. Biological indicators are in the low-to-medium range: soil respiration, predicted soil protein, and aggregate 
-stability all have room to improve. These are the indicators that respond best to reduced tillage and continuous cover cropping over time.
+Soil health was assessed using the **Cornell Soil Health Test**. The overall quality score was **66/100 (High)**. Chemistry is in excellent shape across the board: pH at 6.2 (score 97), extractable phosphorus (86), potassium (100), and all additional nutrients (100). The biological indicators are the main area that needs attention: soil respiration scored 24/100, predicted soil protein 32/100, and aggregate stability 36/100, all in the Low range. These reflect a microbial community that is working below its potential and soil structure that is somewhat fragile under rainfall stress. Surface hardness (56) and subsurface hardness (59) are both in the medium range, indicating moderate compaction worth monitoring. These biological and physical indicators respond best to reduced tillage and continuous cover cropping over time.
 :::
 
 ```{r soil-cards, echo=FALSE}
@@ -479,22 +476,32 @@ HTML('
          text-transform:uppercase; color:#9ca3af; margin-bottom:8px;">
          Overall Quality Score</div>
     <div style="font-size:2.2rem; font-weight:700; font-family:monospace;
-         line-height:1;">62 / 100</div>
+         line-height:1;">66 / 100</div>
     <div style="font-size:11px; color:#9ca3af; margin-top:6px;">
          Rating: High &nbsp;|&nbsp; Cornell Soil Health Lab</div>
   </div>
 
   <div style="background:#fff; border:1px solid #e5e7eb;
-       border-top:4px solid #ef4444; border-radius:12px; padding:18px 20px;">
+       border-top:4px solid #F97316; border-radius:12px; padding:18px 20px;">
     <div style="font-size:10px; font-weight:700; letter-spacing:1.3px;
          text-transform:uppercase; color:#9ca3af; margin-bottom:8px;">
-         ⚠ Surface Hardness</div>
+         ⚠ Soil Respiration</div>
     <div style="font-size:2.2rem; font-weight:700; font-family:monospace;
-         line-height:1;">10 / 100</div>
-    <div style="font-size:11px; color:#ef4444; margin-top:6px;">
-         Very Low - constraining rooting &amp; water transmission</div>
+         line-height:1;">24 / 100</div>
+    <div style="font-size:11px; color:#F97316; margin-top:6px;">
+         Low — microbial activity below potential</div>
   </div>
 
+  <div style="background:#fff; border:1px solid #e5e7eb;
+       border-top:4px solid #F97316; border-radius:12px; padding:18px 20px;">
+    <div style="font-size:10px; font-weight:700; letter-spacing:1.3px;
+         text-transform:uppercase; color:#9ca3af; margin-bottom:8px;">
+         ⚠ Predicted Soil Protein</div>
+    <div style="font-size:2.2rem; font-weight:700; font-family:monospace;
+         line-height:1;">32 / 100</div>
+    <div style="font-size:11px; color:#F97316; margin-top:6px;">
+         Low — N mineralization capacity limited</div>
+  </div>
 
 </div>
 ')
@@ -503,19 +510,19 @@ HTML('
 ```{=html}
 <figure style="margin: 24px 0; text-align: center;">
   <img
-    src="images/gruschowNorth_soilhealth.jpg"
-    alt="Cornell Soil Health Assessment — Gruschow North"
+    src="images/gruschowSouth_soilhealth.jpg"
+    alt="Cornell Soil Health Assessment — Gruschow South"
     style="max-width: 100%; max-height: 650px; border-radius: 8px;
            border: 1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,0.07);"
     onerror="this.style.display='none'"
   />
   <figcaption style="font-size: 0.82rem; color: #6b7280; margin-top: 8px;">
-    <strong>Figure 2.</strong> Cornell Assessment of Soil Healthreport - Gruschow North.
+    <strong>Figure 2.</strong> Cornell Assessment of Soil Health report - M4F2S2.
   </figcaption>
 </figure>
 
 <div style="margin: 0 0 24px;">
-  <a href="data/gruschowNorth_soilhealth.pdf"
+  <a href="data/gruschowSouth_soilhealth.pdf"
      target="_blank" rel="noopener noreferrer"
      style="display: inline-flex; align-items: center; gap: 8px;
             background: #4CAF50; color: #fff; font-weight: 600;
@@ -531,15 +538,14 @@ HTML('
 ## 🌧️ Weather & Drought Conditions {#weather}
 
 ::: {.page-intro}
-**Cumulative precipitation** at your field compared to the all-site average,alongside the weekly drought index from June through November 2025. A large single-day rain event hit in late June, around 65 mm, which pushed your cumulative total well above the all-site average heading into July. From there, rainfall stayed consistent and moderate through the summer, tracking closely with the network average. The drought index stayed at None all the way through September, no stress during vegetative growth or grain fill. Mild drought conditions appeared in October. One thing worth watching: given the low aggregate stability score (33/100), that heavy June rain event may have contributed to some surface crusting or 
-runoff, something to monitor in future seasons.
+**Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index from June through November 2025. A large single-day rain event hit in late June, around 65 mm, which pushed your cumulative total well above the all-site average heading into July. From there, rainfall stayed consistent and moderate through the summer, tracking closely with the network average. The drought index stayed at None all the way through September. Mild drought conditions appeared in October. One thing worth watching: given the low aggregate stability score (36/100), that heavy June rain event may have contributed to some surface crusting or runoff, something to monitor in future seasons, particularly given the silt loam texture of this field.
 :::
 
 ```{=html}
 <figure style="margin: 0 0 24px; text-align: center;">
   <img
-    src="images/GruschowNorth_weather.png"
-    alt="Weather and drought conditions 2025 — Gruschow North"
+    src="images/GruschowSouth_weather.png"
+    alt="Weather and drought conditions 2025 — Gruschow South"
     style="max-width: 100%; border-radius: 8px; border: 1px solid #e5e7eb;
            box-shadow: 0 2px 8px rgba(0,0,0,0.07);"
     onerror="this.style.display='none'"
@@ -576,6 +582,7 @@ HTML(paste0('
   .conc-card.violet { border-left-color: #7c3aed; }
   .conc-card.pink   { border-left-color: #e879a0; }
   .conc-card.red    { border-left-color: #ef4444; }
+  .conc-card.orange { border-left-color: #F97316; }
   .conc-title {
     font-weight: 700; font-size: 0.85rem; text-transform: uppercase;
     letter-spacing: 0.8px; color: #6b7280; margin-bottom: 6px;
@@ -587,19 +594,19 @@ HTML(paste0('
 
   <div class="conc-card">
     <div class="conc-title">🌽 Maize Biomass Nitrogen</div>
-    Corn plants across the field averaged <strong>2.76% N</strong> in mid-season biomass, with a C:N ratio of <strong>16.3</strong>. Plot-to-plot variability was modest, the crop was consistently well-supplied with nitrogen across all 9 sampled locations at the 163 lb N/ac input rate.
+    Corn plants across the field averaged <strong>', bio_sum$mean_N, '% N</strong> in mid-season biomass, with a C:N ratio of <strong>', bio_sum$mean_CN, '</strong>. Tissue nitrogen was notably higher than the M5F2S2 field, reflecting strong crop nitrogen uptake across the ', bio_sum$n, ' sampled locations at the 163 lb N/ac input rate.
   </div>
 
   <div class="conc-card violet">
     <div class="conc-title">🌱 Cover Crop N Contribution</div>
-    The cover crop came in at a mean C:N of <strong>22.6</strong> and tissue N of <strong>2.02%</strong>, low enough to decompose relatively quickly and supply nitrogen. 
+    The cover crop came in at a mean C:N of <strong>', cc_sum$mean_CN, '</strong> and tissue N of <strong>', cc_sum$mean_N, '%</strong>, a moderate C:N ratio indicating gradual nitrogen release through the season rather than a fast early flush. This is still useful for building season-long N supply.
   </div>
 
-  <div class="conc-card red">
-    <div class="conc-title">⚠ Surface Compaction — Priority Constraint</div>
-   Surface hardness scored <strong>10/100 </strong>. This level of compaction is restricting root growth and slowing water movement through the surface layer. Soil respiration (32), predicted soil protein (39), and aggregate stability (33) all came back in the Low range. The microbial community is working below its potential. Reducing tillage intensity, keeping the soil covered as long as possible, and adding fresh organic matter are the primary ways to move these numbers up over time.
+  <div class="conc-card orange">
+    <div class="conc-title">⚠ Biological Activity and aggregate stability— Priority Constraints</div>
+    Soil respiration scored <strong>24/100</strong> and predicted soil protein <strong>32/100</strong>, both in the Low range. Aggregate stability (36/100) is also low, meaning soil structure is somewhat vulnerable to rainfall-driven disruption. The microbial community is working below its potential. Maintaining plant cover, adding fresh organic matter, and reducing tillage intensity are the primary levers to move these numbers up over time.
   </div>
-
+  
  </div>
 '))
 ```
@@ -608,3 +615,4 @@ HTML(paste0('
 
 ::: {style="font-size: 0.82rem; color: #9ca3af; text-align: center; margin-top: 32px; border-top: 1px solid #e5e7eb; padding-top: 16px;"}
 Report generated by <strong><a href="https://www.farmersdatalab.org/" target="_blank">Farmers DataLab</a></strong> - Cornell University ·
+:::
