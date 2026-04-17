@@ -329,7 +329,7 @@ This report summarizes the on-farm nitrogen experiment conducted in Field G7, wh
 ```
 
 ::: {.page-intro}
-**Take-home message:** The results this season were mixed. Plowing the sod earlier (Treatment) did produce greener, higher-chlorophyll leaves, a sign of better early-season vigor. But that early advantage didn't carry through to overall nitrogen status, tissue nitrogen, or a yield advantage by the end of the season. In fact, yield was slightly lower in the Treatment strips. Both systems kept the crop adequately supplied with nitrogen, Control CSNT came in just below the optimal threshold, Treatment just above it. Your soil is in good shape overall, and this is a question worth revisiting with another season of data.
+**Take-home message:** Plowing the sod earlier (Treatment) did produce greener, higher-chlorophyll leaves, a sign of better early-season vigor. Though the in-season plant nitrogen was slightly lower in the treatment, end of season nitrate was slightly higher. Final yield also appeared slightly higher in the unmowed treatement area, relative to the control. Both systems kept the crop adequately supplied with nitrogen, Control CSNT came in just below the optimal threshold, Treatment just above it. Your soil is in good shape overall, and this is a question worth revisiting with another season of data.
 :::
 
 ---
