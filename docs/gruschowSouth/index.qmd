@@ -1,7 +1,7 @@
 ---
 title: "YOUR OFE 2025 REPORT"
 author: "Farmers DataLab"
-date: today
+date: 2026-03-15
 format:
   html:
     theme: cosmo
@@ -215,7 +215,7 @@ we're giving you a field-level picture of how the corn crop performed, what the 
 </figure>
 
 <div style="margin: 16px 0 24px; text-align: center;">
-  <a href=""https://farmersdatalab.github.io/91e3d7b4-2a6f-4c0a-8e1d-3f7b5c9a6d88/"
+  <a href="https://farmersdatalab.github.io/91e3d7b4-2a6f-4c0a-8e1d-3f7b5c9a6d88/"
      target="_blank"
      rel="noopener noreferrer"
      style="display: inline-flex; align-items: center; gap: 8px;
@@ -230,7 +230,7 @@ we're giving you a field-level picture of how the corn crop performed, what the 
 
 ::: {.page-intro}
 **Take-home message:**
-The corn crop across this field showed high and consistent nitrogen status mid-season, with tissue nitrogen averaging `r bio_sum$mean_N`% across the sampled points, reflecting strong crop nitrogen uptake at the `r gs_nrate_val` lb N/ac input rate. The cover crop residue had a C:N ratio of `r cc_sum$mean_CN`, placing it in the moderate range, decomposition will be gradual, with nitrogen releasing steadily through the season rather than all at once. The soil health assessment returned an overall score of **66/100 (High)**. Chemical indicators are excellent across the board. The main areas to watch are biological and physical structure: soil respiration (24), predicted soil protein (32), and aggregate stability (36) are all in the Low range, and surface and subsurface hardness are at medium functioning. These are the indicators that improve most with reduced tillage and continuous cover cropping over time.
+The corn crop across this field showed high and consistent nitrogen status mid-season, with tissue nitrogen averaging `r bio_sum$mean_N`% across the sampled points at the `r gs_nrate_val` lb N/ac input rate. The cover crop residue had a C:N ratio of `r cc_sum$mean_CN`, which is below 25, so decomposition should be relatively fast and nitrogen should become available early in the season. The soil health assessment returned an overall score of **66/100 (High)**. Chemical indicators are excellent across the board. The main areas to watch are biological and physical structure: soil respiration (24), predicted soil protein (32), and aggregate stability (36) are all in the Low range, and surface and subsurface hardness are at medium functioning. These are the indicators that improve most with reduced tillage and continuous cover cropping over time.
 :::
 
 ---
@@ -412,6 +412,7 @@ cards_row(
 ```{r cc-n-bar, echo=FALSE, message=FALSE, warning=FALSE}
 p_cc_n <- ggplot(gs_cover, aes(x = factor(Plot), y = TotalN_pct)) +
   geom_col(fill = col_cover, color = "black", alpha = 0.85, width = 0.65) +
+  geom_hline(yintercept = 25, linetype = "dashed", color = "#F9C74F", linewidth = 0.9) +
   geom_hline(yintercept = cc_sum$mean_N, linetype = "dashed",
              color = col_pink, linewidth = 0.9) +
   annotate("text", x = 3.2, y = cc_sum$mean_N + 0.09,
@@ -538,7 +539,7 @@ HTML('
 ## 🌧️ Weather & Drought Conditions {#weather}
 
 ::: {.page-intro}
-**Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index from June through November 2025. A large single-day rain event hit in late June, around 65 mm, which pushed your cumulative total well above the all-site average heading into July. From there, rainfall stayed consistent and moderate through the summer, tracking closely with the network average. The drought index stayed at None all the way through September. Mild drought conditions appeared in October. One thing worth watching: given the low aggregate stability score (36/100), that heavy June rain event may have contributed to some surface crusting or runoff, something to monitor in future seasons, particularly given the silt loam texture of this field.
+**Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index from June through November 2025. A large single-day rain event hit in mid-June, around 65 mm, which pushed your cumulative total well above the all-site average heading into July. From there, rainfall stayed consistent and moderate through the summer, tracking closely with the network average. The drought index stayed at None through most of September. It moved to Low in late September and to Mild in October, and your field finished the season slightly below the all-site average (about 425 mm vs 470 mm). One thing worth watching: given the low aggregate stability score (36/100), that heavy June rain event may have contributed to some surface crusting or runoff, something to monitor in future seasons, particularly given the silt loam texture of this field.
 :::
 
 ```{=html}
@@ -594,16 +595,16 @@ HTML(paste0('
 
   <div class="conc-card">
     <div class="conc-title">🌽 Maize Biomass Nitrogen</div>
-    Corn plants across the field averaged <strong>', bio_sum$mean_N, '% N</strong> in mid-season biomass, with a C:N ratio of <strong>', bio_sum$mean_CN, '</strong>. Tissue nitrogen was notably higher than the M5F2S2 field, reflecting strong crop nitrogen uptake across the ', bio_sum$n, ' sampled locations at the 163 lb N/ac input rate.
+    Corn plants across the field averaged <strong>', bio_sum$mean_N, '% N</strong> in mid-season biomass, with a C:N ratio of <strong>', bio_sum$mean_CN, '</strong>. Tissue nitrogen was notably higher than in the M5F2S2 field, which received the same rate, across the ', bio_sum$n, ' sampled locations at the 163 lb N/ac input rate.
   </div>
 
   <div class="conc-card violet">
     <div class="conc-title">🌱 Cover Crop N Contribution</div>
-    The cover crop came in at a mean C:N of <strong>', cc_sum$mean_CN, '</strong> and tissue N of <strong>', cc_sum$mean_N, '%</strong>, a moderate C:N ratio indicating gradual nitrogen release through the season rather than a fast early flush. This is still useful for building season-long N supply.
+    The cover crop came in at a mean C:N of <strong>', cc_sum$mean_CN, '</strong> and tissue N of <strong>', cc_sum$mean_N, '%</strong>, a low C:N ratio (below 25), which points to relatively fast decomposition and early-season nitrogen release. The five samples were very similar to each other.
   </div>
 
   <div class="conc-card orange">
-    <div class="conc-title">⚠ Biological Activity and aggregate stability— Priority Constraints</div>
+    <div class="conc-title">⚠ Biological Activity and Aggregate Stability — Priority Constraints</div>
     Soil respiration scored <strong>24/100</strong> and predicted soil protein <strong>32/100</strong>, both in the Low range. Aggregate stability (36/100) is also low, meaning soil structure is somewhat vulnerable to rainfall-driven disruption. The microbial community is working below its potential. Maintaining plant cover, adding fresh organic matter, and reducing tillage intensity are the primary levers to move these numbers up over time.
   </div>
   
