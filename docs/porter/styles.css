@@ -189,3 +189,47 @@ body {
 .accordion .accordion-item {
   border-color: var(--border);
 }
+/* -------- Reglas solo para imprimir / PDF -------- */
+@media print {
+  /* Mantener los colores de fondo (barra verde, tarjetas) */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Ocultar lo que solo sirve en pantalla */
+  .sidebar, #quarto-sidebar, #quarto-margin-sidebar, #quarto-sidebar-toc-left,
+  nav#TOC, .lab-topbar__right, .nav-tabs, .no-print {
+    display: none !important;
+  }
+
+  /* Usar todo el ancho de la hoja */
+  #quarto-content { display: block !important; }
+  main.content, #quarto-document-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* No cortar tarjetas, figuras, gráficos ni tablas entre páginas */
+  .sc-row, .sc, .conc-card, .page-intro, figure, img, table,
+  .plotly, .html-widget, .cell-output-display {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* No dejar un título solo al final de una página */
+  h2, h3 {
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+
+  img, .plotly, .html-widget { max-width: 100% !important; }
+  /* Mantener junta cada subsección (título + tarjetas + gráfico) */
+  section.level3 {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  
+}

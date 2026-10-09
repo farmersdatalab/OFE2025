@@ -1,7 +1,7 @@
 ---
 title: "YOUR OFE 2025 REPORT"
 author: "Farmers DataLab"
-date: today
+date: 2026-03-15
 format:
   html:
     theme: cosmo
@@ -176,7 +176,7 @@ yield_stats <- df_yield |>
   group_by(treatment) |>
   summarise(
     n    = n(),
-    mean = round(mean(yield, na.rm = TRUE), 3),
+    mean = round(mean(yield, na.rm = TRUE), 1),
     sd   = round(sd(yield,   na.rm = TRUE), 3),
     se   = round(sd(yield,   na.rm = TRUE) / sqrt(n()), 4),
     med  = round(median(yield, na.rm = TRUE), 3),
@@ -190,8 +190,8 @@ m_cover_yield <- yield_stats |> filter(treatment == "treatment") |> pull(mean)
 n_ctrl_yield  <- yield_stats |> filter(treatment == "control")   |> pull(n)
 n_cover_yield <- yield_stats |> filter(treatment == "treatment") |> pull(n)
 
-delta_yield <- round(m_cover_yield - m_ctrl_yield, 3)
-pct_yield   <- round(100 * delta_yield / m_ctrl_yield, 2)
+delta_yield <- round(m_cover_yield - m_ctrl_yield, 1)
+pct_yield   <- round(100 * delta_yield / m_ctrl_yield, 1)
 p_yield     <- ifelse(tt_yield$p.value < 0.001, "p < 0.001",
                       paste0("p = ", signif(tt_yield$p.value, 3)))
 
@@ -271,7 +271,7 @@ cn_cards <- function(mean_cover, mean_nocover, pct_inc, cohen_d, label_metric, n
     <div class="sc" style="border-top: 4px solid #F9C74F">
       <div class="sc-label">Cohen\'s d (effect size)</div>
       <div class="sc-main">
-        <span class="sc-val">', round(cohen_d, 2), '</span>
+        <span class="sc-val">', round(abs(cohen_d), 2), '</span>
       </div>
       <div class="sc-sub">', note, '</div>
     </div>
@@ -329,7 +329,7 @@ This report summarizes the on-farm nitrogen experiment conducted in Field G7, wh
 ```
 
 ::: {.page-intro}
-**Take-home message:** Plowing the sod earlier (Treatment) did produce greener, higher-chlorophyll leaves, a sign of better early-season vigor. Though the in-season plant nitrogen was slightly lower in the treatment, end of season nitrate was slightly higher. Final yield also appeared slightly higher in the unmowed treatement area, relative to the control. Both systems kept the crop adequately supplied with nitrogen, Control CSNT came in just below the optimal threshold, Treatment just above it. Your soil is in good shape overall, and this is a question worth revisiting with another season of data.
+**Take-home message:** Plowing the sod earlier (Treatment) did produce greener, higher-chlorophyll leaves, a sign of better early-season vigor. Though the in-season plant nitrogen was slightly lower in the treatment, end of season nitrate was slightly higher. Final yield also appeared slightly higher in the unmowed treatment area, relative to the control. Both systems kept the crop adequately supplied with nitrogen, Control CSNT came in just below the optimal threshold, Treatment just above it. Your soil is in good shape overall, and this is a question worth revisiting with another season of data.
 :::
 
 ---
@@ -608,7 +608,7 @@ ggplotly(p) |> layout(showlegend=FALSE)
 ## 🧪 C:N in Corn Biomass {#cn-details}
 
 ::: {.page-intro}
-we collected corn plant samples from both Treatment and 
+We collected corn plant samples from both Treatment and 
 Control strips and sent them to the lab for nitrogen analysis. This tells us exactly how much nitrogen ended up inside the plant — not just what was in the soil or available in theory, but what the crop actually took up. Because the number of samples is small, we can't run a standard statistical test, but we report the effect size (Cohen's d) to give you a sense of how meaningful the difference is in practical terms.
 :::
 
@@ -637,7 +637,7 @@ cn_cards(
 mean_data_N <- cn_summary |> select(Treatment, mean_N, se_N)
 
 increase_label_N <- paste0(
-  "Treatment = +", perc_N, "% N  |  Cohen's d = ", round(d_N_cn$Cohens_d, 2),
+  "Treatment = ", ifelse(perc_N >= 0, "+", ""), perc_N, "% N  |  Cohen's d = ", round(abs(d_N_cn$Cohens_d), 2),
   "  |  n = ", n_nocover_cn, " vs ", n_cover_cn
 )
 
@@ -721,7 +721,7 @@ p_cn <- ggplot(mean_data_CN, aes(x = Treatment, y = mean_CN, fill = Treatment)) 
     title    = "C:N Ratio in Corn Biomass (Mean ± SE)",
     subtitle = paste0("Treatment C:N = ", mean_cover_CN,
                       " vs Control = ", mean_nocover_CN,
-                      "  |  Cohen's d = ", round(d_CN_cn$Cohens_d, 2)),
+                      "  |  Cohen's d = ", round(abs(d_CN_cn$Cohens_d), 2)),
     x = "Treatment", y = "C:N Ratio",
     caption = "Lower C:N ratio = more nitrogen-rich plant tissue."
   ) +
@@ -839,7 +839,7 @@ rotations can help move those numbers up over time.
 
 ::: {.page-intro}
 **Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index from June through November 2025. Your field had a very consistent and well-distributed rainfall season in 2025. 
-Precipitation tracked closely with the all-site average from June through October, finishing near 400 mm cumulative. There were no major drought episodes: the drought index stayed at None for the entire growing season, from planting through harvest. Moisture was not a 
+Precipitation tracked closely with the all-site average from June through October, finishing near 490 mm (about 19 inches) cumulative, slightly above the all-site average. There were no major drought episodes: the drought index stayed at None for every week shown. Moisture was not a 
 limiting factor for your crop this year, which means the differences we see between Treatment and Control strips are more likely driven by management and soil factors than by weather. 
 :::
 ```{=html}
@@ -858,7 +858,7 @@ limiting factor for your crop this year, which means the differences we see betw
 ## 📝 Conclusions {#conclusions}
 
 ```{r conclusion-callouts, echo=FALSE}
-HTML('
+HTML(paste0('
 <style>
   .conclusion-grid {
     display: grid;
@@ -892,14 +892,14 @@ vs Control at <strong>59.5</strong>, a difference of less than 1%. Plowing the s
 
   <div class="conc-card">
     <div class="conc-title">🍃 Chlorophyll Index (Chl)</div>
-    Chlorophyll was <strong>9.1% higher</strong> in the Treatment strips, a statistically significant difference. The leaves in the earlier-plowed strips were noticeably greener, suggesting a stronger early-season start. However, this did not translate into a higher NBI or better tissue nitrogen, so the early vigor advantage did not persist through the full season.
+    Chlorophyll was <strong>9.1% higher</strong> in the Treatment strips, a statistically significant difference. The leaves in the earlier-plowed strips were noticeably greener, suggesting a stronger early-season start. However, this did not translate into a higher NBI or better tissue nitrogen.
   </div>
 
   <div class="conc-card amber">
     <div class="conc-title">🧪 Biomass Nitrogen (%N)</div>
     Lab analysis showed Treatment plants had slightly <strong>less nitrogen in 
 their tissue</strong> than Control (3.775% vs 3.92%, a difference of -3.7%). 
-The effect size was small, and the sample size is too limited for a firm 
+The effect size is small in absolute terms, and the sample size is too limited for a firm 
 conclusion, but the direction is worth noting, as it runs counter to what 
 the chlorophyll result suggested.
   </div>
@@ -910,16 +910,16 @@ the chlorophyll result suggested.
 below the 750 ppm optimal threshold, and Treatment at <strong>771 ppm</strong>, 
 just inside the optimal range. Both crops finished the season reasonably 
 well-supplied with nitrogen. With one sample per treatment, this is an 
-observation to carry forward into next seasons analysis.
+observation to carry forward into 	the analysis of next season.
   </div>
 
   <div class="conc-card teal">
     <div class="conc-title">🌾 Corn Yield</div>
-    <strong>Treatment plots yielded 123.8 bu/ac vs 131.6 bu/ac in Control</strong> (-5.89%). The difference is statistically significant. However, with a large number of pixels, even small differences become significant, the <strong>5.89% absolute difference</strong> is the more meaningful indicator.
+   <strong>Treatment strips yielded ', m_cover_yield, ' bu/ac vs ', m_ctrl_yield, ' bu/ac in Control</strong> (', ifelse(pct_yield >= 0, "+", ""), pct_yield, '%). With thousands of yield monitor points even small differences come out statistically significant, so the size of the difference (', delta_yield, ' bu/ac) is the more meaningful number. Keep in mind that the Control area includes the field edges, which often yield less, while the Treatment strip runs through the middle of the field.
   </div>
 
 </div>
-')
+'))
 ```
 
 ::: {style="font-size: 0.82rem; color: #9ca3af; text-align: center; margin-top: 32px; border-top: 1px solid #e5e7eb; padding-top: 16px;"}
