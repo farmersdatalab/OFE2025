@@ -1,7 +1,7 @@
 ---
 title: "YOUR OFE 2025 REPORT"
 author: "Farmers DataLab"
-date: today
+date: 2026-03-15
 format:
   html:
     theme: cosmo
