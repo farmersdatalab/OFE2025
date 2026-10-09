@@ -1,7 +1,7 @@
 ---
 title: "YOUR OFE 2025 REPORT"
 author: "Farmers DataLab"
-date: today
+date: 2026-03-15
 format:
   html:
     theme: cosmo
@@ -271,7 +271,7 @@ This report summarizes the on-farm nitrogen rate experiment conducted in field 3
 ```
 
 ::: {.page-intro}
-**Take-home message:** Take-home message: More nitrogen generally meant more nitrogen in the plant and higher stalk nitrate at season end, but it didn't always mean more yield. The 50 lb N/ac strip actually outperformed the 62 lb N/ac strip, suggesting there's a point where adding more fertilizer stops paying off. The variable-rate strips, which received the least nitrogen, had the lowest yield and stalk nitrate values just barely above the sufficiency threshold, indicating nitrogen was likely a limiting factor there. Your soil chemistry is excellent, but biological activity is still developing. As the cover crop system matures, the soil should be able to supply more nitrogen internally, and the optimal fertilizer rate may shift lower over time.
+**Take-home message:** More nitrogen generally meant more nitrogen in the plant and higher stalk nitrate at season end, but it didn't always mean more yield. The 50 lb N/ac strip actually outperformed the 62 lb N/ac strip, suggesting there's a point where adding more fertilizer stops paying off. The variable-rate strips had the lowest average yield and stalk nitrate values just barely above the sufficiency threshold, although the low yield comes mostly from one strip on the southern edge of the field. Your soil chemistry is excellent, but biological activity is still developing. As the cover crop system matures, the soil should be able to supply more nitrogen internally, and the optimal fertilizer rate may shift lower over time.
 :::
 
 ---
@@ -380,7 +380,7 @@ p <- ggplot(yield_clean, aes(x = Strip, y = Yield, fill = NGroup)) +
     x        = "Strip",
     y        = "Yield (bu/ac)",
     fill     = NULL,
-    caption  = "Strip order matches field layout (R0 = northernmost strip)."
+    caption  = "Strip order matches field layout (R0 = southernmost strip, R9 = northernmost)."
   ) +
   theme_minimal(base_size = 13) +
   theme(plot.title = element_text(face = "bold"),
@@ -554,7 +554,7 @@ p <- ggplot(bra_cn_plot2, aes(x = PlotName, y = TotalN_pct, fill = NGroup)) +
     subtitle = "Each bar = mean of sub-samples A and B",
     x = "Strip", y = "Total Nitrogen (%)",
     fill = " ",
-    caption = "Strip order matches field layout (R0 = northernmost strip)."
+    caption = "Strip order matches field layout (R0 = southernmost strip, R9 = northernmost)."
   ) +
   theme_minimal(base_size = 13) +
   theme(plot.title = element_text(face = "bold"),
@@ -680,9 +680,7 @@ and cycles nutrients isn't as active as it could be yet. This is where your cove
 ## 🌧️Weather & Drought Conditions {#weatherDrought}
 
 ::: {.page-intro}
-**Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index from June through November 2025. Your field consistently tracked well below the all-site average for cumulative 
-rainfall from June through October, finishing the season around 250 mm compared to roughly 400 mm at the network average. Individual rain events were scattered and relatively small, the largest came in late June and 
-mid-August, but there were long dry stretches in between. Drought conditions were Low through August and most of September, then escalated to Mild for most of October before easing in November. This extended dry period is an important backdrop for interpreting your results: drier conditions can limit how much nitrogen the plant can take up from the soil, and may help explain why the lower N rate strips, especially the variable-rate strips, showed signs of tighter nitrogen supply by season end.  
+**Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index, from late May through mid-November 2025. Your field tracked well below the all-site average for cumulative rainfall from June onward, finishing the season around 320 mm (about 13 inches) compared to roughly 470 mm at the network average. Individual rain events were scattered and relatively small, with dry stretches in between; the largest were around 20 mm, in late June, mid-August and late October. The drought index was Low for two weeks in mid-August and two weeks in late September, rose to Mild for most of October, and eased back to Low in November. This drier season is an important backdrop for interpreting your results: drier conditions can limit how much nitrogen the plant can take up from the soil, which may have contributed to the signs of tight nitrogen supply seen in some strips by season end.
 :::
 ```{=html}
 <figure style="margin: 0 0 24px; text-align: center;">
@@ -725,18 +723,18 @@ HTML(paste0('
 
 <div class="conc-card amber">
   <div class="conc-title">🧪 Biomass %N in Corn</div>
-Tissue nitrogen showed a clear trend with N rate, ranging from <strong>3.57% at 25 lb N/ac</strong> up to <strong>4.17% at 62 lb N/ac</strong>. Higher rates delivered more nitrogen to the plant. With only one or two strips per rate, we cannot confirm this statistically, but the direction is consistent and makes agronomic sense.
+Tissue nitrogen ranged from <strong>3.57% at 25 lb N/ac</strong> up to <strong>4.17% at 62 lb N/ac</strong>. The highest rate had the most nitrogen in the plant, but the steps in between were not steady: the 50 lb N/ac strip came in below the 37 lb N/ac strips. With only one or two strips per rate, we cannot confirm this statistically, but the overall direction makes agronomic sense.
 </div>
 
 <div class="conc-card pink">
   <div class="conc-title">🌽 Cornstalk Nitrate (CSNT)</div>
- End-of-season stalk nitrate also increased with N rate — from <strong>336 ppm at 25 lb N/ac</strong> up to <strong>943 ppm at 62 lb N/ac</strong>. All fixed-rate strips cleared the 250 ppm sufficiency threshold. The variable-rate strips averaged just <strong>257 ppm</strong> — barely above the threshold, suggesting 
+ End-of-season stalk nitrate also increased with N rate — from <strong>336 ppm at 25 lb N/ac</strong> up to <strong>943 ppm at 62 lb N/ac</strong>. On average, every fixed-rate group was above the 250 ppm sufficiency threshold, although one of the two 37 lb N/ac strips came in well below it (', round(min(bra_csnt_plot$CSNT_ppm[bra_csnt_plot$NGroup == "37 lb N/ac"])), ' ppm). The variable-rate strips averaged just <strong>257 ppm</strong> — barely above the threshold, suggesting 
 those areas may have been cutting it close on nitrogen supply by harvest.
 </div>
 
 <div class="conc-card">
   <div class="conc-title">🌾 Corn Yield</div>
-The <strong>50 lb N/ac strip produced the highest yield at 178.1 bu/ac</strong>, outperforming the 62 lb N/ac strip (170.8 bu/ac) and the variable-rate strips (155.7 bu/ac). The yield did not keep climbing with more nitrogen, it peaked at 50 lb N/ac and dropped at the highest rate. That is a useful signal: somewhere around 50 lb N/ac may be close to the economic optimum for this field under cover crop management.
+The <strong>50 lb N/ac strip produced the highest yield at 178.1 bu/ac</strong>, outperforming the 62 lb N/ac strip (170.8 bu/ac) and the variable-rate strips (155.7 bu/ac). The yield did not keep climbing with more nitrogen, it peaked at 50 lb N/ac and dropped at the highest rate. That is a useful signal, but each of these rates was a single strip, and two strips that received the same rate (37 lb N/ac) differed by about as much, so it needs to be repeated before settling on a rate.
 </div>
 
 <div class="conc-card teal">
