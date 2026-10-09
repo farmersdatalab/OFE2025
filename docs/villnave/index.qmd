@@ -1,7 +1,7 @@
 ---
 title: "YOUR OFE 2025 REPORT"
 author: "Farmers DataLab"
-date: today
+date: 2026-03-15
 format:
   html:
     theme: cosmo
@@ -47,7 +47,8 @@ csnt_file   <- "OFE2025_CSNT.csv"
 # ============================================================
 #  DUALEX — LECTURA Y LIMPIEZA
 # ============================================================
-df_raw <- read_csv(file.path(data_dir, dualex_file), show_col_types = FALSE)
+df_raw <- read_csv(file.path(data_dir, dualex_file), show_col_types = FALSE) |>
+  distinct()
 
 df_clean <- df_raw |>
   mutate(
@@ -166,7 +167,7 @@ pal     <- c("control" = "#e879a0", "treatment" = "#0d9488")
 pal_cn  <- c("Control" = "#e879a0", "Treatment" = "#0d9488")
 
 fmt <- function(x) ifelse(x == round(x), as.character(round(x)), as.character(x))
-
+sign_fmt <- function(x) ifelse(x >= 0, paste0("+", x), as.character(x))
 # ============================================================
 #  FUNCIÓN: 2 cards por sección
 # ============================================================
@@ -236,7 +237,7 @@ cn_cards <- function(mean_cover, mean_nocover, pct_inc, cohen_d, label_metric, n
     <div class="sc" style="border-top: 4px solid #F9C74F">
       <div class="sc-label">Cohen\'s d (effect size)</div>
       <div class="sc-main">
-        <span class="sc-val">', round(cohen_d, 2), '</span>
+        <span class="sc-val">', 	round(abs(cohen_d), 2), '</span>
       </div>
       <div class="sc-sub">', note, '</div>
     </div>
@@ -295,8 +296,8 @@ This report summarizes the on-farm nitrogen experiment conducted in your field, 
 
 ::: {.page-intro}
 **Take-home message:** 
-Across all four nitrogen indicators (NBI, Chlorophyll, Biomass %N, and CSNT) corn plants in the cover crop strips consistently showed better nitrogen status than those in 
-the control strips. Leaf readings were greener and more nitrogen-sufficient, plant tissue had noticeably more nitrogen, and end-of-season stalk nitrate revealed a clear difference between treatments: control stalks were well below the sufficiency threshold, while cover crop stalks were within the optimal range. Your soil health score is solid overall, but building biological activity through 
+Across all four nitrogen indicators (NBI, Chlorophyll, Biomass %N, and CSNT) corn plants in the cover crop strips showed better nitrogen status than those in 
+the control strips. Leaf readings were greener and more nitrogen-sufficient, plant tissue had noticeably more nitrogen, and end-of-season stalk nitrate revealed a clear difference between treatments: control stalks were well below the sufficiency threshold, while cover crop stalks were within the optimal range. Keep in mind that the tissue and stalk results come from very few samples, so they are early signals rather than proof. Your soil health score is solid overall, but building biological activity through 
 continued cover cropping is the clearest path to unlocking even more nitrogen from the soil over time.
 :::
 
@@ -381,8 +382,7 @@ The map below shows the **corn yield spatial distribution** across Field 3, disp
 ## 🌿 Nitrogen Balance Index (NBI) {#nbi-details}
 
 ::: {.page-intro}
-The **Nitrogen Balance Index (NBI)** is measured with the Dualex sensor and reflects the ratio of chlorophyll to flavonoids in the leaf. A higher NBI indicates better nitrogen status, the plant has enough N to build chlorophyll without accumulating excess flavonoids as a stress response. e took two readings per plant and averaged them, then compared the 
-cover crop strips against the control strips to see if the cover crop made a difference using a two-sample t-test.The result was statistically significant, meaning the difference we saw is real and not just random field variation. 
+The **Nitrogen Balance Index (NBI)** is measured with the Dualex sensor and reflects the ratio of chlorophyll to flavonoids in the leaf. A higher NBI indicates better nitrogen status, the plant has enough N to build chlorophyll without accumulating excess flavonoids as a stress response. We took two readings per plant on `r sum(stats_nbi$n)` plants (`r stats_nbi$n[stats_nbi$treatment == "treatment"]` in the cover crop strips, `r stats_nbi$n[stats_nbi$treatment == "control"]` in the control), averaged them, and compared the two groups with a two-sample t-test. The difference was statistically significant, meaning it is unlikely to be explained by random variation between plants.
 :::
 
 ```{r nbi-cards, echo=FALSE}
@@ -492,8 +492,7 @@ ggplotly(p) |> layout(showlegend=FALSE)
 ## 🧪 C:N in Corn Biomass {#cn-details}
 
 ::: {.page-intro}
-Corn biomass was collected and sent for laboratory C:N analysis. This measures the actual nitrogen concentration in the plant tissue, a direct indicator of how much N the plant was able to take up. **Note:** Because we only had a small number of samples per treatment, we can't run 
-a full statistical test, but the effect size gives us a good sense of whether the difference is biologically meaningful.
+Corn biomass was collected and sent for laboratory C:N analysis. This measures the actual nitrogen concentration in the plant tissue, a direct indicator of how much N the plant was able to take up. **Note:** We only collected a few biomass samples (`r n_nocover_cn` control, `r n_cover_cn` treatment), which is too few for a reliable statistical test. Instead, we report an "effect size" (Cohen's d). It answers a simple question: is the gap between the cover crop and control strips bigger than the normal differences you see from one sample to the next within the same strip? A value near 0 means the two strips look about the same. A value above 0.8 means the gap clearly stands out from that normal variation. With so few samples, treat it as a hint rather than proof.
 :::
 
 ### Total Nitrogen in Biomass (%N)
@@ -518,7 +517,7 @@ mean_data_N <- cn_summary |>
   select(Treatment, mean_N, se_N)
 
 increase_label_N <- paste0(
-  "Treatment = +", perc_N, "% N  |  Cohen's d = ", round(d_N_cn$Cohens_d, 2),
+  "Treatment = +", perc_N, "% N  |  Cohen's d = ", 	round(abs(d_N_cn$Cohens_d), 2),
   "  |  n = ", n_nocover_cn, " vs ", n_cover_cn
 )
 
@@ -597,7 +596,7 @@ p_cn <- ggplot(mean_data_CN, aes(x = Treatment, y = mean_CN, fill = Treatment)) 
     title    = "C:N Ratio in Corn Biomass (Mean ± SE)",
     subtitle = paste0("Treatment C:N = ", mean_cover_CN,
                       " vs Control = ", mean_nocover_CN,
-                      "  |  Cohen's d = ", round(d_CN_cn$Cohens_d, 2)),
+                      "  |  Cohen's d = ", round(abs(d_CN_cn$Cohens_d), 2)),
     x = "Treatment", y = "C:N Ratio",
     caption = "Lower C:N ratio = more nitrogen-rich plant tissue."
   ) +
@@ -683,8 +682,7 @@ ggplotly(p_csnt) |> layout(showlegend = FALSE)
 ## 🌱 Soil Health Assessment {#soilhealth}
 
 ::: {.page-intro}
-Soil health was assessed using the **Cornell Soil Health Test** (sampled 06/11/2025, Field 3). The overall quality score was **69/100 (High)**. The physical structure of your soil is strong: water holding capacity and surface hardness both came back well. The area to watch 
-is biological activity, soil respiration and active carbon scored low, which means the microbial community that breaks down organic matter and cycles nutrients isn't as active as it could be. The good news is that cover cropping directly targets exactly this: feeding soil microbes, adding carbon, and building the biological engine of your soil over time.
+Soil health was assessed using the **Cornell Soil Health Test** (sampled June 11, 2025, Field 3). The overall quality score was **69/100 (High)**. Chemical indicators are strong: pH (6.3), phosphorus and potassium all scored 98 or higher. On the physical side, water holding capacity (87) and surface hardness (75) came back well, while aggregate stability (55) and subsurface hardness (59) are in the Medium range. The area to watch is biological activity: soil respiration scored 16 (Very Low), and active carbon and soil protein both scored 34 (Low), which means the microbial community that breaks down organic matter and cycles nutrients isn't as active as it could be. Cover cropping works on exactly this: it feeds soil microbes and adds carbon, which helps build biological activity over time.
 :::
 
 ```{=html}
@@ -714,8 +712,7 @@ is biological activity, soil respiration and active carbon scored low, which mea
 ## 🌧️Weather & Drought Conditions {#weatherDrought}
 
 ::: {.page-intro}
-**Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index from June through November 2025. Your field had one of the wettest seasons across all sites in 2025. Cumulative rainfall reached nearly 600 mm, well above the all-site average, with consistent precipitation from June through September and a strong pulse of rain during late August and early September. Drought stress was essentially 
-absent all season, with only a brief Low signal in early November.  
+**Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index, from late May through mid-November 2025. Your field had a wetter season than the average site: cumulative rainfall reached about 650 mm (about 26 inches), well above the all-site average of about 470 mm. Rain was frequent in June and July, followed by a mostly dry stretch in the first half of August and several large events in late August. The weekly drought index stayed at None for almost the whole period, with only a brief Low signal in late October. 
 :::
 ```{=html}
 <figure style="margin: 0 0 24px; text-align: center;">
@@ -759,46 +756,50 @@ HTML(paste0('
 
 <div class="conclusion-grid">
 
-  <div class="conc-card teal">
+<div class="conc-card teal">
   <div class="conc-title">🌿 Leaf Nitrogen Status (NBI)</div>
-  Cover crop strips showed a <strong>12.8% higher NBI</strong> compared to the 
-control (76 vs 67.4). That means corn plants growing in the cover crop strips 
-had significantly better nitrogen status mid-season, a clear and statistically meaningful difference.
+  Cover crop strips showed a <strong>', pct_nbi, '% higher NBI</strong> compared to the
+  control (', fmt(m_cover_nbi), ' vs ', fmt(m_ctrl_nbi), '). Corn plants in the
+  cover crop strips had better nitrogen status mid-season, and the difference was
+  statistically significant.
 </div>
 
-  <div class="conc-card">
+<div class="conc-card">
   <div class="conc-title">🍃 Chlorophyll Index (Chl)</div>
-  Chlorophyll values were also higher in cover crop plots
-  (<strong>+6.6%</strong>), consistent with the NBI result.
-  Higher chlorophyll reflects greener, more nitrogen-sufficient leaves,
-  a direct sign of improved N uptake in the treatment strips.
+  Chlorophyll values were also higher in cover crop strips
+  (<strong>', sign_fmt(pct_chl), '%</strong>; ', fmt(m_cover_chl), ' vs ', fmt(m_ctrl_chl), '),
+  consistent with the NBI result. Higher chlorophyll reflects greener,
+  more nitrogen-sufficient leaves.
 </div>
 
 <div class="conc-card amber">
   <div class="conc-title">🧪 Biomass Nitrogen (%N)</div>
   Laboratory analysis of corn biomass showed treatment plants had
-  <strong>+17.6% more nitrogen</strong> in their tissue (2.286% vs 1.944%). The effect size (Cohens d = -0.57) suggests a meaningful biological difference, although the small sample size prevents  formal statistical testing.
+  <strong>', sign_fmt(perc_N), '% more nitrogen</strong> in their tissue on average
+  (', mean_cover_N, '% vs ', mean_nocover_N, '%). The effect size
+  (Cohen\'s d = ', round(abs(d_N_cn$Cohens_d), 2), ') is moderate, but with only ',
+  n_nocover_cn, ' control and ', n_cover_cn, ' treatment samples, and values that overlap
+  between the two groups, this difference could be due to chance.
 </div>
 
-  <div class="conc-card pink">
+<div class="conc-card pink">
   <div class="conc-title">🌽 End-of-Season CSNT</div>
-  The stalk nitrate result is the most striking finding of the season. The control 
-came in at just <strong>79 ppm</strong>, well below the 250 ppm sufficiency 
-threshold, indicating the crop ran short on nitrogen late in the season. The 
-cover crop strip came in at <strong>938 ppm</strong>, right in the optimal range 
-(750–2,000 ppm). The cover crop appears to have kept nitrogen flowing to the 
-plant all the way through harvest.
+  The control stalk sample came in at <strong>', csnt_ctrl_lab, '</strong>, below the
+  250 ppm sufficiency threshold, while the cover crop sample came in at
+  <strong>', csnt_cover_lab, '</strong>, within the optimal range (750–2,000 ppm).
+  This is a large gap and it points in the same direction as the leaf readings,
+  but it comes from a single sample per treatment, so it cannot be tested
+  statistically and should be confirmed with more samples next season.
 </div>
 
 <div class="conc-card teal">
   <div class="conc-title">🌱 Soil Health</div>
-Your overall soil health score of <strong>69/100 (High)</strong> reflects good 
-physical structure but low biological activity, particularly soil respiration 
-(score 16) and active carbon (score 34). Continued cover cropping is the most 
-direct way to address both: more organic inputs mean more microbial activity, 
-which means more nitrogen cycling from the soil itself over time.
+  Your overall soil health score of <strong>69/100 (High)</strong> reflects good
+  water holding capacity and nutrient levels, with low biological activity:
+  soil respiration (score 16), active carbon (score 34) and soil protein (score 34).
+  Cover cropping adds organic inputs that feed soil microbes, so continuing it is
+  a reasonable way to work on these indicators over time.
 </div>
-
 
 </div>
 '))
