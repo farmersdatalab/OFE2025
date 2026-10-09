@@ -237,6 +237,9 @@ mean_cover_yield   <- yield_summary |> filter(Treatment == "Cover")    |> pull(m
 mean_nocover_yield <- yield_summary |> filter(Treatment == "No Cover") |> pull(mean_buac)
 delta_yield        <- round(mean_cover_yield - mean_nocover_yield, 1)
 pct_yield          <- round(100 * delta_yield / mean_nocover_yield, 1)
+n_cover_yield   <- yield_summary |> filter(Treatment == "Cover")    |> pull(n)
+n_nocover_yield <- yield_summary |> filter(Treatment == "No Cover") |> pull(n)
+n_total_yield   <- nrow(bens_yield)
 
 # ============================================================
 #  PALETAS Y HELPERS
@@ -317,7 +320,7 @@ cn_cards <- function(mean_cover, mean_nocover, pct_inc, cohen_d, label_metric, n
     <div class="sc" style="border-top: 4px solid #F9C74F">
       <div class="sc-label">Cohen\'s d (effect size)</div>
       <div class="sc-main">
-        <span class="sc-val">', round(cohen_d, 2), '</span>
+        <span class="sc-val">',round(abs(cohen_d), 2), '</span>
       </div>
       <div class="sc-sub">', note, '</div>
     </div>
@@ -370,7 +373,7 @@ This report summarizes the on-farm nitrogen experiment conducted in your Kolb2 f
 ```
 
 ::: {.page-intro}
-**Take-home message:** Across all in-season nitrogen indicators (NBI, chlorophyll, biomass %N, and grain %N) corn plants in the clover cover crop strips consistently showed higher nitrogen status than control plots, and this translated into a meaningful yield advantage of +16 bu/ac (+11.8%) at harvest. That said, end-of-season cornstalk nitrate values fell below the 250 ppm deficiency threshold in both strips, suggesting that while the cover crop improved early-season nitrogen availability, the full 60 lb N/ac target was likely not met, making direct clover biomass sampling in 2026 the key next step.
+**Take-home message:** Across the nitrogen indicators we measured (NBI, chlorophyll, biomass %N, and grain %N), corn plants in the clover cover crop strips consistently showed higher nitrogen status than control plots, and yield monitor data showed a `r sign_fmt(delta_yield)` bu/ac (`r sign_fmt(pct_yield)`%) difference in favor of the cover crop strips at harvest. That said, end-of-season cornstalk nitrate values fell below the 250 ppm deficiency threshold in both strips, suggesting that while the cover crop improved early-season nitrogen availability, the full 60 lb N/ac target was likely not met, making direct clover biomass sampling in 2026 the key next step.
 :::
 
 ---
@@ -387,39 +390,38 @@ summary_df <- tibble(
     "🌾 Grain %N",
     "🌽 CSNT"
   ),
-  `Control` = c(
+`Control` = c(
+    paste0(mean_nocover_yield, " bu/ac"),
     paste0(m_ctrl_nbi),
     paste0(m_ctrl_chl),
     paste0(mean_nocover_N_bio, "%"),
     paste0(mean_nocover_N_gr, "%"),
-    paste0(csnt_ctrl, " ppm"),
-    paste0(mean_nocover_yield, " bu/ac")
+    paste0(csnt_ctrl, " ppm")
   ),
   `Cover (Treatment)` = c(
+    paste0(mean_cover_yield, " bu/ac"),
     paste0(m_cover_nbi),
     paste0(m_cover_chl),
     paste0(mean_cover_N_bio, "%"),
     paste0(mean_cover_N_gr, "%"),
-    paste0(csnt_cover, " ppm"),
-    paste0(mean_cover_yield, " bu/ac")
+    paste0(csnt_cover, " ppm")
   ),
   `Difference` = c(
+    paste0(sign_fmt(delta_yield), " bu/ac (", sign_fmt(pct_yield), "%)"),
     paste0(sign_fmt(delta_nbi), " (", pct_nbi, "%)"),
     paste0(sign_fmt(delta_chl), " (", pct_chl, "%)"),
     paste0(sign_fmt(perc_N_bio), "%"),
     paste0(sign_fmt(perc_N_gr), "%"),
-    paste0(sign_fmt(csnt_cover - csnt_ctrl), " ppm"),
-    paste0("+", delta_yield, " bu/ac (+", pct_yield, "%)")
+    paste0(sign_fmt(csnt_cover - csnt_ctrl), " ppm")
   ),
-  `p-value` = c(p_nbi, p_chl, "n too small*", p_N_gr, "n = 1", "spatial data†")
+  `p-value` = c("spatial data†", p_nbi, p_chl, "n too small*", p_N_gr, "n = 1")
 )
-
 knitr::kable(summary_df, align = c("l","c","c","c","c"))
 ```
 
 ::: {style="font-size: 0.82rem; color: #9ca3af; margin-top: -8px;"}
 \* Biomass C:N sample sizes are small (n = `r n_nocover_bio` Control, n = `r n_cover_bio` Treatment). Effect sizes (Cohen's d) are reported instead of p-values for that section.
-† Yield monitor data contains ~130,000 GPS points with spatial autocorrelation — a simple p-value is not appropriate. The difference is reported as a descriptive field-level observation.
+† Yield monitor data contains `r format(n_total_yield, big.mark = ",")` GPS points with spatial autocorrelation — a simple p-value is not appropriate. The difference is reported as a descriptive field-level observation.
 :::
 
 ---
@@ -428,7 +430,7 @@ knitr::kable(summary_df, align = c("l","c","c","c","c"))
 
 
 ::: {.page-intro}
-The map below shows the **corn yield spatial distribution** across the Kolb2 field, displayed in bushels per acre. The line separates the clover cover crop (treatment) and control sub-fields.
+The map below shows the **corn yield spatial distribution** across the Kolb2 field, displayed in bushels per acre. The red outline marks the clover cover crop (treatment) area and the blue outline marks the control strip.
 :::
 
 ```{=html}
@@ -670,10 +672,10 @@ ggplotly(p) |> layout(showlegend=FALSE)
 
 ---
 
-## 🧪 C:N in Corn Biomass —  {#cn-biomass-details}
+## 🧪 C:N in Corn Biomass {#cn-biomass-details}
 
 ::: {.page-intro}
-Corn biomass was collected and sent for laboratory C:N analysis. This tells us how much nitrogen the plant had absorbed and incorporated into its tissue up to that point in the season, a more direct measure than the leaf sensor readings. Because the number of samples per treatment is small, we report effect size (Cohen's d) rather than a p-value. 
+Corn biomass was collected and sent for laboratory C:N analysis. This tells us how much nitrogen the plant had absorbed and incorporated into its tissue up to that point in the season, a more direct measure than the leaf sensor readings. We only collected a few biomass samples (`r n_nocover_bio` control, `r n_cover_bio` treatment), which is too few for a reliable statistical test. Instead, we report an "effect size" (Cohen's d). It answers a simple question: is the gap between the cover crop and control strips bigger than the normal differences you see from one sample to the next within the same strip? A value near 0 means the two strips look about the same. A value above 0.8 means the gap clearly stands out from that normal variation. 
 :::
 
 ### Total Nitrogen in Biomass (%N)
@@ -710,7 +712,7 @@ p_n_bio <- ggplot(mean_data_N_bio, aes(x = Treatment, y = mean_N, fill = Treatme
   labs(
     title    = "N in Corn Biomass (Mean %N ± SE)",
     subtitle = paste0("Cover = +", perc_N_bio, "% N  |  Cohen's d = ",
-                      round(d_N_bio$Cohens_d, 2),
+                      round(abs(d_N_bio$Cohens_d), 2),
                       "  |  n = ", n_nocover_bio, " vs ", n_cover_bio),
     x = "Treatment", y = "Nitrogen (%)",
     caption  = "Note: small sample size — results are descriptive only."
@@ -776,7 +778,7 @@ p_cn_bio <- ggplot(mean_data_CN_bio, aes(x = Treatment, y = mean_CN, fill = Trea
     title    = "C:N Ratio in Corn Biomass (Mean ± SE)",
     subtitle = paste0("Cover C:N = ", mean_cover_CN_bio,
                       " vs Control = ", mean_nocover_CN_bio,
-                      "  |  Cohen's d = ", round(d_CN_bio$Cohens_d, 2)),
+                      "  |  Cohen's d = ", round(abs(d_CN_bio$Cohens_d), 2)),
     x = "Treatment", y = "C:N Ratio",
     caption = "Lower C:N ratio = more nitrogen-rich plant tissue."
   ) +
@@ -814,8 +816,7 @@ ggplotly(p_raw_CN_bio) |> layout(showlegend = FALSE)
 ## 🌾 C:N in Corn Grain {#cn-grain-details}
 
 ::: {.page-intro}
-Grain samples were collected and analyzed for C:N content. A lower ratio means the tissue is more nitrogen-rich relative to its carbon content. If the clover strips show a lower C:N, it confirms that those plants were not just taking up more nitrogen in absolute terms, they were incorporating it more efficiently into their tissue structure. A C:N below 20 in corn 
-biomass at this growth stage is generally a sign of a well-nourished plant.
+Grain samples were collected and analyzed for C:N content.Grain %N is closely related to grain protein. The C:N ratio expresses how much carbon there is for each unit of nitrogen, so a lower ratio means more nitrogen-rich grain. If the clover strips show higher %N and a lower C:N, it suggests those plants had more nitrogen available during grain fill.
 :::
 
 ### Total Nitrogen in Grain (%N) 
@@ -849,7 +850,7 @@ p_n_gr <- ggplot(mean_data_N_gr, aes(x = Treatment, y = mean_N, fill = Treatment
   labs(
     title    = "N in Corn Grain (Mean %N ± SE)",
     subtitle = paste0("Cover = ", sign_fmt(perc_N_gr), "% N  |  Cohen's d = ",
-                      round(d_N_gr$Cohens_d, 2),
+                      round(abs(d_N_gr$Cohens_d), 2),
                       "  |  n = ", n_nocover_gr, " vs ", n_cover_gr,
                       "  |  ", p_N_gr),
     x = "Treatment", y = "Nitrogen (%)"
@@ -1053,7 +1054,7 @@ Soil health was assessed using the **Cornell Soil Health Test**. The overall qua
 ## 🌧️Weather & Drought Conditions {#weatherDrought}
 
 ::: {.page-intro}
-**Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index from June through November 2025. Your field had a very clean growing season from a weather standpoint. Rainfall was well-distributed from June through November, tracking closely with the all-site average and finishing near 400 mm cumulative. Individual rain events were moderate and spread out — no single extreme event, but also no prolonged dry spells. The drought index stayed at None for the entire growing season, from planting through harvest, with no drought stress recorded at any point.  
+**Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index, from late May through mid-November 2025. Your field received about 530 mm (about 21 inches) of rain over this period, somewhat more than the all-site average of about 470 mm. The two tracked closely through mid-August; from late August onward your field received more rain than the average site. Rain was not evenly spread: there were several large events of more than 25 mm (1 inch) in a day, in early June, late August, October and November, and a mostly dry stretch in the first half of August. Even so, the weekly drought index stayed at None for every week shown, so no drought stress was recorded.
 :::
 ```{=html}
 <figure style="margin: 0 0 24px; text-align: center;">
@@ -1100,43 +1101,51 @@ HTML(paste0('
 
 <div class="conc-card teal">
   <div class="conc-title">🌿 Leaf Nitrogen Status (NBI)</div>
-  Cover crop plots showed a <strong>16.3% higher NBI</strong> compared to Control
-  (48.4 vs 41.6). Chlorophyll was also higher by <strong>16.3%</strong>. Both in-season readings point in the same direction: corn plants
+  Cover crop strips showed a <strong>', pct_nbi, '% higher NBI</strong> compared to Control
+  (', m_cover_nbi, ' vs ', m_ctrl_nbi, '). Chlorophyll was also higher by <strong>', pct_chl, '%</strong>
+  (', m_cover_chl, ' vs ', m_ctrl_chl, '). Both in-season readings point in the same direction: corn plants
   in cover crop strips had consistently better nitrogen status during the growing season.
 </div>
 
 <div class="conc-card amber">
   <div class="conc-title">🧪 Biomass Nitrogen (%N)</div>
-  Laboratory analysis of corn biomass showed cover plots had
-  <strong>+18.2% more nitrogen</strong> in their tissue (2.828% vs 2.392%). Cohens d = -1.53, indicating a large biological effect. With n = 5 per group,
+  Laboratory analysis of corn biomass showed cover strips had
+  <strong>', sign_fmt(perc_N_bio), '% more nitrogen</strong> in their tissue
+  (', mean_cover_N_bio, '% vs ', mean_nocover_N_bio, '%). Cohen\'s d = ',
+  round(abs(d_N_bio$Cohens_d), 2), ', indicating a large effect. With n = ', n_nocover_bio,
+  ' control and n = ', n_cover_bio, ' treatment samples,
   formal statistical testing is not appropriate, but the magnitude of the
   difference is notable and consistent with the Dualex readings.
 </div>
 
 <div class="conc-card">
   <div class="conc-title">🌾 Grain Nitrogen (%N)</div>
-  At harvest, grain %N was <strong>+16.3% higher</strong> in cover strips
-  (1.262% vs 1.085%). This is a statistically significant result, and reflects the full-season nitrogen story:cover crop plants not only showed better in-season status but also accumulated
+  At harvest, grain %N was <strong>', sign_fmt(perc_N_gr), '% higher</strong> in cover strips
+  (', mean_cover_N_gr, '% vs ', mean_nocover_N_gr, '%; ', p_N_gr, '; n = ', n_nocover_gr,
+  ' control, ', n_cover_gr, ' treatment). This reflects the full-season nitrogen story:
+  cover crop plants not only showed better in-season status but also accumulated
   more nitrogen in the grain itself.
 </div>
 
 <div class="conc-card pink">
   <div class="conc-title">🌽 CSNT — N Limiting in Both Strips</div>
   End-of-season stalk nitrate was below the 250 ppm deficiency threshold in
-  both treatments (Control: <strong>74 ppm</strong>; Cover: <strong>57 ppm</strong>).
+  both treatments (Control: <strong>', csnt_ctrl_lab, '</strong>; Cover: <strong>', csnt_cover_lab, '</strong>).
   This indicates the corn crop was nitrogen-limited regardless of treatment.
-  The 60 lb/ac clover N target was not demonstrably met this season,
+  The 60 lb/ac clover N target was likely not met this season;
   direct clover biomass sampling would help quantify actual N supply in 2026.
 </div>
 
 <div class="conc-card teal">
   <div class="conc-title">🌾 Corn Yield — Cover vs No Cover</div>
-  Yield monitor data showed cover crop strips averaged <strong>142.7 bu/ac</strong>
-  vs <strong>133 bu/ac</strong> in control strips, a difference of
-  <strong>+9.7 bu/ac (+7.3%)</strong>. Given the spatial autocorrelation inherent
+  Yield monitor data showed cover crop strips averaged <strong>', mean_cover_yield, ' bu/ac</strong>
+  vs <strong>', mean_nocover_yield, ' bu/ac</strong> in control strips, a difference of
+  <strong>', sign_fmt(delta_yield), ' bu/ac (', sign_fmt(pct_yield), '%)</strong>. Given the spatial autocorrelation inherent
   in yield monitor data, this is a descriptive field observation rather than a
   formal statistical result, but the direction is consistent with all in-season
   nitrogen indicators.
+</div>
+
 </div>
 '))
 ```
