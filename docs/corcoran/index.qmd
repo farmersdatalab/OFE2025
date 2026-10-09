@@ -1,7 +1,7 @@
 ---
 title: "YOUR OFE 2025 REPORT"
 author: "Farmers DataLab"
-date: today
+date: 2026-03-15
 format:
   html:
     theme: cosmo
@@ -231,7 +231,7 @@ This report summarizes the on-farm nitrogen rate experiment conducted in your fi
 ```
 
 ::: {.page-intro}
-**Take-home message:** In this season, dropping the nitrogen rate from 60 down to 40–50 lb N/ac made very little difference in how much nitrogen ended up in the plant tissue. Yield was somewhat lower in the reduced-rate strips, but the strip that got the same rate as the control (T1 = 60 lb N/ac) also yielded less, which tells us the field itself has some natural variation that's harder to separate from the N rate effect. With only one strip per treatment, we can't call anything a firm conclusion yet. What we can say is that the cover crop system is showing real promise, and running this trial again with more strips will give us the confidence to know whether you can safely cut back on nitrogen inputs.
+**Take-home message:** In this season, dropping the nitrogen rate from 60 down to 40–50 lb N/ac made very little difference in how much nitrogen ended up in the plant tissue. Yield was lower in the reduced-rate strips than in the control, which is the rest of the field, but the strip that got the same rate as the control (T1 = 60 lb N/ac) also yielded less, which tells us the field itself has some natural variation that's harder to separate from the N rate effect. With only one strip per treatment, we can't call anything a firm conclusion yet. What we can say is that the reduced rates held up reasonably well this season, and running this trial again with more strips will give us the confidence to know whether you can safely cut back on nitrogen inputs.
 :::
 
 ---
@@ -272,7 +272,7 @@ knitr::kable(summary_display,
 ```
 
 ::: {style="font-size: 0.82rem; color: #9ca3af; margin-top: -8px;"}
-n = 4 samples per treatment. T0 = Control (farmer rate, 60 lb N/ac). Results are descriptive; effect sizes are reported given small sample sizes.
+n = 4 samples per treatment. T0 = Control (farmer rate, 60 lb N/ac). Results are descriptive given the small sample sizes.
 :::
 
 ---
@@ -320,13 +320,13 @@ ggplotly(p_y) |> layout(showlegend = FALSE)
 ## 🧪 C:N in Corn Biomass {#cn-details}
 
 ::: {.page-intro}
-Corn biomass was collected and sent for laboratory C:N analysis. This measures the actual nitrogen concentration in plant tissue, a direct indicator of how much N the plant was able to take up at the time of sampling. **Note:** sample sizes are small (n = 4 per treatment), so results are descriptive. Effect sizes (Cohen's d vs Control) are reported instead of p-values.
+Corn biomass was collected and sent for laboratory C:N analysis. This measures the actual nitrogen concentration in plant tissue, a direct indicator of how much N the plant was able to take up at the time of sampling. **Note:** sample sizes are small (n = 4 per treatment), so results are descriptive. 
 :::
 
 ### Total Nitrogen in Biomass (%N) {#n-section}
 
 ::: {.page-intro}
-This number tells you what percentage of the plant tissue is nitrogen. A higher %N means the plant had good access to nitrogen during the season. All four strips came in very close to each other, which is a good sign: it suggests the plants in the reduced-rate strips weren't running short on N, even with less fertilizer applied.
+This number tells you what percentage of the plant tissue is nitrogen. A higher %N means the plant had good access to nitrogen during the season. All four strips came in very close to each other, which is a good sign: it suggests the plants in the reduced-rate strips weren't running short on N, even with less fertilizer applied, although the 40 lb N/ac average depends heavily on one high sample.
 :::
 
 ```{r cn-n-cards, echo=FALSE}
@@ -469,7 +469,7 @@ ggplotly(p_raw_CN) |> layout(showlegend = FALSE)
 ## 🌱 Soil Health Assessment {#soilhealth}
 
 ::: {.page-intro}
-Soil health was assessed using the **Cornell Soil Health Test**. The overall quality score was **63/100 (High)**. Physical indicators were strong (Available Water Capacity: 76, Surface Hardness: 69, Subsurface Hardness: 70). The main areas for improvement were biological indicators: **Organic Matter** (score 21-Low), **Soil Respiration** (score 28-Low),and  **Predicted Soil Protein** (score 32-Low). Chemical indicators were excellent, with Soil pH (100), Extractable Phosphorus (100), and Extractable Potassium (92) all in the Very High range. One flag to follow up on: **zinc came back as deficient**.
+Soil health was assessed using the **Cornell Soil Health Test**. The overall quality score was **63/100 (High)**. Most physical indicators were good (Available Water Capacity: 76, Surface Hardness: 69, Subsurface Hardness: 70), although Aggregate Stability scored Low (29). The main areas for improvement were biological indicators: **Organic Matter** (score 21-Low), **Soil Respiration** (score 28-Low),and  **Predicted Soil Protein** (score 32-Low). Chemical indicators were excellent, with Soil pH (100), Extractable Phosphorus (100), and Extractable Potassium (92) all in the Very High range. One flag to follow up on: **zinc came back as deficient**.
 :::
 
 ```{=html}
@@ -500,8 +500,7 @@ Soil health was assessed using the **Cornell Soil Health Test**. The overall qua
 
 ::: {.page-intro}
 **Cumulative precipitation** at your field compared to the all-site average, alongside the weekly drought index from June through November 2025.  Your field received strong rainfall early in the season, including a large event 
-in late June, and tracked near the all-site average through summer. However, a dry period from late September through October brought Mild drought conditions 
-for roughly 4–5 weeks. This late-season moisture stress is worth considering when looking at your yield and end-of-season nitrogen results.
+in late June, and tracked near the all-site average through summer. However, the drought index moved to Low in mid-September, rose to Mild for the four weeks of October, and eased back to Low in November. This late-season moisture stress is worth considering when looking at your yield results.
 :::
 ```{=html}
 <figure style="margin: 0 0 24px; text-align: center;">
@@ -574,15 +573,15 @@ HTML(paste0('
 
  <div class="conc-card teal">
   <div class="conc-title">🌾 Corn Yield</div>
-  The Control strip (T0, 60 lb N/ac) yielded <strong>204 bu/ac</strong>.
+  The Control strip (T0, 60 lb N/ac, the rest of the field) yielded <strong>204 bu/ac</strong>.
   Both reduced-rate strips were lower: T2 (50 lb N/ac) at <strong>178 bu/ac</strong>
   and T3 (40 lb N/ac) at <strong>180 bu/ac</strong>. Notably, T1, which received
-  the same 60 lb N/ac as the Control T0, yielded only <strong>185 bu/ac</strong>, That tells us the field has some natural variability that is affecting results as much as the N rate. With one strip per treatment, we are looking at observations, not conclusions yet.
+  the same 60 lb N/ac as the Control T0, yielded only <strong>185 bu/ac</strong>. That tells us the field has some natural variability that is affecting results as much as the N rate. Compared with T1, the neighboring strip at the same 60 lb N/ac rate, the reduced-rate strips were only 5 to 7 bu/ac lower.
 </div>
 
 <div class="conc-card teal">
   <div class="conc-title">🧪 Biomass %N</div>
-  Plant tissue nitrogen was nearly identical across all four strips — T0 at <strong>3.49%</strong>, T2 at <strong>3.37%</strong>, and T3 at <strong>3.42%</strong>. The reduced-rate strips were just barely below the control, less than 0.12 percentage points of difference. T1 came in the lowest at 3.22% despite receiving the same N rate as T0, which again points to field variability rather than a nitrogen effect. The plants in the lower-rate strips were not running short on N.
+  Plant tissue nitrogen was nearly identical across all four strips — T0 at <strong>3.49%</strong>, T2 at <strong>3.37%</strong>, and T3 at <strong>3.42%</strong>. The reduced-rate strips were just barely below the control, less than 0.12 percentage points of difference. T1 came in the lowest at 3.22% despite receiving the same N rate as T0, which again points to field variability rather than a nitrogen effect. Keep in mind that the T3 average is lifted by one unusually high sample (4.37%); its other three samples were the lowest in the trial, so this result needs to be confirmed.
 </div>
 
 <div class="conc-card amber">
@@ -593,7 +592,7 @@ HTML(paste0('
 <div class="conc-card">
   <div class="conc-title">🌱 Soil Health</div>
   The overall score was <strong>63/100 (High)</strong>, with excellent chemical
-  indicators (pH, P, K all near 100). The main gaps are: Organic Matter (21) Soil Respiration (28), Active carbon (52), and Aggregate Stability (29). As cover cropping continues, these scores should improve, potentially
+  indicators (pH, P, K all near 100). The main gaps are: Organic Matter (21), Soil Respiration (28),Predicted Soil Protein (32), and Aggregate Stability (29). As cover cropping continues, these scores should improve, potentially
   increasing nitrogen mineralization and the effective N credit from the cover crop. One flag to follow up on: zinc came back as deficient.
 </div>
 '))
