@@ -1,7 +1,7 @@
 ---
 title: "YOUR OFE 2025 REPORT"
 author: "Farmers DataLab"
-date: today
+date: 2026-03-15
 format:
   html:
     theme: cosmo
@@ -70,22 +70,8 @@ yield_raw <- read_csv(file.path(data_dir, yield_file), show_col_types = FALSE)
 
 mac_yield <- yield_raw |>
   filter(FarmName == "macauley") |>
-  mutate(
-    Block  = factor(str_extract(PlotName, "BLK[0-9]+")),
-    TrtNum = as.integer(str_extract(PlotName, "[0-9]+$")),
-    NGroup = factor(case_when(
-      TrtNum == 1 ~ "Zero",
-      TrtNum == 2 ~ "Low",
-      TrtNum == 3 ~ "Standard",
-      TrtNum == 4 ~ "High"
-    ), levels = c("Zero", "Low", "Standard", "High")),
-    Nrate  = case_when(
-      TrtNum == 1 ~   0,
-      TrtNum == 2 ~  30,
-      TrtNum == 3 ~  90,
-      TrtNum == 4 ~ 150
-    )
-  ) |>
+  mutate(Block = factor(str_extract(PlotName, "BLK[0-9]+"))) |>
+  left_join(nrates, by = "PlotName") |>
   filter(!is.na(NGroup), !is.na(Yield_buAc))
 
 # Summary by NGroup
@@ -401,8 +387,7 @@ This report summarizes the on-farm nitrogen rate trial conducted in the Ntrials 
 ```
 
 ::: {.page-intro}
-**Take-home message:** Take-home message: No matter how much nitrogen we applied, from zero all 
-the way up to 150 lb/ac, yield, plant color, and end-of-season stalk nitrate were virtually identical across all strips. Your soil appears to be supplying nitrogen on its own, well beyond what the crop needed this season. Based on this data, you may be applying more nitrogen than necessary. Continuing with cover crops remains a smart long-term investment to keep building soil health, even if the short-term nitrogen response isn't showing up yet.
+**Take-home message:** Yield responded to nitrogen up to the standard rate, and not beyond it. Strips with no nitrogen yielded about `r round(filter(yield_summary, NGroup == "Standard")$mean_yield - filter(yield_summary, NGroup == "Zero")$mean_yield)` bu/ac less than the standard 90 lb N/ac rate, while going from 90 to 150 lb N/ac added nothing. Plant color, tissue nitrogen and end-of-season stalk nitrate did not differ among rates. Based on this data, the standard rate was enough this season and the high rate did not pay off. Continuing with cover crops remains a smart long-term investment to keep building soil health.
 :::
 
 ---
@@ -719,7 +704,7 @@ ggplotly(p) |> config(displaylogo = FALSE) |> layout(showlegend = FALSE)
 ## 🧪 C:N in Corn Biomass {#cn-details}
 
 ::: {.page-intro}
-We collected corn plant samples from each to measure how much nitrogen actually ended up inside the plant tissue. This is one of the most direct measurements we have, it tells you what the crop actually absorbed, not just what was available in the soil. Each of the 16 plots had two sub-samples averaged together, and we used the same block design as the other analyses to keep the comparison fair. We also ran a linear regression to see if tissue nitrogen climbed steadily with more N applied.
+We collected corn plant samples from each plot to measure how much nitrogen actually ended up inside the plant tissue. This is one of the most direct measurements we have, it tells you what the crop actually absorbed, not just what was available in the soil. Biomass data were available for `r nrow(mac_cn_plot)` of the 16 plots, with up to two sub-samples per plot averaged together, and we used the same block design as the other analyses to keep the comparison fair. We also ran a linear regression to see if tissue nitrogen climbed steadily with more N applied.
 :::
 
 ```{r cn-cards, echo=FALSE}
@@ -856,7 +841,7 @@ ggplotly(p) |> config(displaylogo = FALSE) |> layout(showlegend = FALSE)
 ## 🌱 Soil Health Assessment {#soilhealth}
 
 ::: {.page-intro}
-Soil health was assessed using the **Cornell Soil Health Test** (sampled 04/30/2025, Ntrials field). The overall quality score was **57/100 (Medium)**. The biological indicators are the main area of concern: soil respiration, organic matter, active carbon, and soil protein index all came back Low. These are the indicators that reflect how active and alive your soil biology is, and right now, that biological engine is running at a lower capacity than ideal. The interesting thing is that despite these low biological scores, your field clearly had plenty of nitrogen available this season. That nitrogen is likely coming from a large existing reserve in the soil, not from active biological cycling. Cover cropping is a direct investment in improving exactly these biological scores over time, feeding the microbes, adding carbon, and building a soil that can supply nitrogen more consistently from its own internal processes.
+Soil health was assessed using the **Cornell Soil Health Test** (sampled 04/30/2025, Ntrials field). The overall quality score was **57/100 (Medium)**. The biological indicators are the main area of concern: soil respiration, organic matter, active carbon, and soil protein index all came back Low. These are the indicators that reflect how active and alive your soil biology is, and right now, that biological engine is running at a lower capacity than ideal. In line with that, the strips that received no fertilizer nitrogen yielded less this season, which suggests the soil on its own did not supply all the nitrogen the crop needed. Cover cropping is a direct investment in improving exactly these biological scores over time, feeding the microbes, adding carbon, and building a soil that can supply nitrogen more consistently from its own internal processes.
 :::
 
 ```{=html}
@@ -920,6 +905,7 @@ cn_high    <- round(filter(cn_summary, NGroup == "High")$mean_N, 3)
 csnt_zero   <- round(filter(csnt_summary, NGroup == "Zero")$mean_csnt, 0)
 csnt_farmer <- round(filter(csnt_summary, NGroup == "Standard")$mean_csnt, 0)
 csnt_high   <- round(filter(csnt_summary, NGroup == "High")$mean_csnt, 0)
+yld <- function(g) filter(yield_summary, NGroup == g)$mean_yield
 
 HTML(paste0('
 <style>
@@ -938,25 +924,20 @@ HTML(paste0('
 
 <div class="conc-card teal">
   <div class="conc-title">🌾 Corn Yield</div>
-  Yield was similar across all four N rates, ranging from <strong>153.8 to 
-167.7 bu/ac</strong>. No clear pattern emerged as nitrogen increased — the 
-strips that got zero fertilizer performed just as well as the ones that got 
-150 lb N/ac. The soil appears to have supplied all the nitrogen the crop 
-needed on its own this season.
+  Yield increased with nitrogen up to the standard rate: <strong>', yld("Zero"), ' bu/ac</strong> with no nitrogen, ', yld("Low"), ' at 30 lb, <strong>', yld("Standard"), '</strong> at 90 lb and ', yld("High"), ' at 150 lb N/ac. The strips with no fertilizer yielded clearly less than the standard and high rates, while those two were the same. This season the crop needed fertilizer nitrogen to reach full yield, but not more than the standard rate.
 </div>
 
 <div class="conc-card teal">
   <div class="conc-title">🌿 NBI</div>
   NBI values were similar across all treatments (86–92), all within a healthy range.
-  Adding more nitrogen did not improve leaf nitrogen status, indicating plants were
+  Adding more nitrogen did not improve leaf nitrogen status, indicating that in mid-July plants were
   well-supplied regardless of N rate.
 </div>
 
 <div class="conc-card">
   <div class="conc-title">🍃 Chlorophyll</div>
   Chlorophyll was nearly identical across all N rates (46–48), confirming that leaf
-  greenness was not affected by how much nitrogen was applied. Plants showed no signs
-  of nitrogen stress even at zero applied N.
+  greenness was not affected by how much nitrogen was applied. At the time of the readings (mid-July), plants showed no signs of nitrogen stress even at zero applied N.
 </div>
 
 <div class="conc-card amber">
@@ -968,16 +949,14 @@ needed on its own this season.
 
 <div class="conc-card pink">
   <div class="conc-title">🌽 CSNT</div>
-  End-of-season stalk nitrate was very high in all treatments (4,588–4,818 ppm),
-  well above the 750 ppm optimal threshold. The crop had abundant nitrogen at
-  season end regardless of how much was applied.
+  End-of-season stalk nitrate was very high on average in all treatments (4,588–4,818 ppm),
+  well above the 750 ppm optimal threshold. Individual plots varied enormously, from about 140 to more than 10,000 ppm, so these averages are rough indications.
 </div>
 
 <div class="conc-card">
   <div class="conc-title">🌱 Soil Health</div>
   The overall soil health score was <strong>57/100 (Medium)</strong>, with low
-  biological activity across the board. Despite this, the field appears to have
-  a large reserve of available nitrogen. Continued cover cropping could improve
+  biological activity across the board.In line with this, the strips with no fertilizer nitrogen yielded less. Continued cover cropping could improve
   organic matter and microbial activity over time, even if a single-season
   nitrogen response is not yet visible.
 </div>
